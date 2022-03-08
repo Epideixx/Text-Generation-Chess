@@ -1,0 +1,11 @@
+test.txt
+checkpoint
+__pycache__
+./wandb
+
+# Because too large files 
+./pgn
+fen.txt
+
+# Except
+!./pgn/Adams.pgn
