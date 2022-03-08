@@ -6,6 +6,7 @@ __pycache__
 # Because too large files 
 ./pgn
 fen.txt
+/transformer
 
 # Except
 !./pgn/Adams.pgn
