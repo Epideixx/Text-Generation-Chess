@@ -30,7 +30,7 @@ class PositionalEncoding(tf.keras.Model):
         Returns
         -------
         PE : tf.Tensor, shape = (seq_length, depth)
-            Position Encoder tensor
+            Positional Encoder tensor
         """
         PE = np.zeros((self.seq_length, self.depth))
         for pos in range(self.seq_length):

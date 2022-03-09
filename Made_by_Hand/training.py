@@ -11,7 +11,7 @@ import numpy as np
 
 from transformer import Transformer
 
-wandb.init(project="Chess-Transformer", entity="epideixx")
+# wandb.init(project="Chess-Transformer", entity="epideixx")
 
 transformer = Transformer()
 dataset = transformer.import_data("test.txt")
@@ -29,6 +29,6 @@ for e in range(NUM_EPOCHS):
         loss = transformer.train_step(boards, encoded_mem_moves,
                                       encoded_move_to_play)
 
-        transformer.save()
+        # transformer.save()
 
-        wandb.log({"train_loss": loss})
+        # wandb.log({"train_loss": loss})

@@ -30,12 +30,12 @@ class TextEmbedder(tf.keras.Model):
         """
         Parameters
         ----------
-        texts_tokenized : tf.Tensor, shape = (batch_size, max_lenght_token)
+        texts_tokenized : tf.Tensor, shape = (..., max_lenght_token)
             Text already tokenized
 
         Returns
         -------
-        embedding : tf.Tensor, shape = (batch_size, max_lenght_token, depth_emb)
+        embedding : tf.Tensor, shape = (..., max_lenght_token, depth_emb)
             Text embedded
         """
         embedding = self.embedding(texts_tokenized)

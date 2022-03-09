@@ -251,6 +251,8 @@ class Decoder(tf.keras.Model):
         logits = tf.concat([tf.expand_dims(self.dense(ffn_out), axis=1)
                            for _ in range(2)], axis=1)  # Because move + <end>
 
+        print(self.summary())
+
         return logits
 
     def save(self, file="decoder"):
@@ -267,7 +269,7 @@ class Decoder(tf.keras.Model):
         self.load_weights(file)
 
 
-class Transformer():
+class Transformer(tf.keras.Model):
 
     def __init__(self, vocab_board=34, vocab_moves=4034, model_size=MODEL_SIZE, max_moves_in_game=500, num_layers=1, h=1):
         """
@@ -275,6 +277,7 @@ class Transformer():
         vocab_moves = 4034 because 64*63 possible moves + <start> + <end>
         max_moves_in_game = 500 because we will not treat the case of very long games for the moment
         """
+        super(Transformer, self).__init__()
         self.encoder = Encoder(vocab_board, model_size, num_layers, h)
         self.decoder = Decoder(vocab_moves, model_size, num_layers, h)
 
@@ -315,7 +318,7 @@ class Transformer():
 
         moves_to_play = self.tokenizer_moves.texts_to_sequences(moves_to_play)
         moves_to_play = tf.keras.preprocessing.sequence.pad_sequences(
-            moves_to_play, padding='post', maxlen=4)  # maxlen = 2
+            moves_to_play, padding='post', maxlen=2)
 
         mem_moves = self.tokenizer_moves.texts_to_sequences(mem_moves)
         mem_moves = tf.keras.preprocessing.sequence.pad_sequences(
@@ -424,8 +427,8 @@ class Transformer():
 if __name__ == '__main__':
     transformer = Transformer()
 
-    encoder = transformer.encoder
-    encoder.save_weights("test_encoder_weights")
-    encoder.load_weights("test_encoder_weights")
+    # encoder = transformer.encoder
+    # encoder.save_weights("test_encoder_weights")
+    # encoder.load_weights("test_encoder_weights")
 
     print("ok")
