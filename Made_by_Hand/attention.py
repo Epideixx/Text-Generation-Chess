@@ -131,6 +131,8 @@ if __name__ == '__main__':
         print(output)
         print(attention)
 
+        print(embedder.summary())
+        print(multi_attention.summary())
         if batch >= 0:
             break
 

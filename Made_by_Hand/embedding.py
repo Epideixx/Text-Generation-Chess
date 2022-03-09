@@ -26,7 +26,7 @@ class TextEmbedder(tf.keras.Model):
             input_dim=vocab_size, output_dim=depth_emb)
         self.embedding.build(vocab_size)
 
-    def __call__(self, texts_tokenized: tf.Tensor):
+    def call(self, texts_tokenized: tf.Tensor):
         """
         Parameters
         ----------
