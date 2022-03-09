@@ -28,3 +28,4 @@ Papiers à voir :
 
 Problèmes :
 - gradients trop faibles voire nuls
+- loss exactement PAREIL à chaque fois 8.303
