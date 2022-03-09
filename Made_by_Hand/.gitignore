@@ -4,7 +4,7 @@ __pycache__
 ./wandb
 
 # Because too large files 
-./pgn
+/pgn
 fen.txt
 /transformer
 
