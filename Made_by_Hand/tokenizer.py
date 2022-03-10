@@ -9,7 +9,7 @@ class ChessTokenizer(tf.keras.Model):
     def __init__(self):
 
         self.tokenizer = tf.keras.preprocessing.text.Tokenizer(
-            filters='')
+            filters='', split=' ', lower=False)
 
     def fit_on_texts(self, text):
         self.tokenizer.fit_on_texts(text)
@@ -25,8 +25,12 @@ class ChessTokenizer(tf.keras.Model):
 # Test
 if __name__ == '__main__':
     tokenizer = ChessTokenizer()
-    texts = "Coucou je m'appelle Jonathan Poli et ceci est un test"
+    texts = ["a2g4 a6f5 d2d4 d8d2", "a2g4 5h6g, d4d5"]
     tokenizer.fit_on_texts(texts)
-    phrase_test = "Et je bosse avec José cette machine"
+    phrase_test = ["a2g4 "]
     token = tokenizer(phrase_test)
     print(token)
+    print(tokenizer.tokenizer.word_index)
+
+    print(len(token))
+    print(len(phrase_test))

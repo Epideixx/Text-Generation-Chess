@@ -45,22 +45,13 @@ class TextEmbedder(tf.keras.Model):
 # Test
 if __name__ == '__main__':
     tokenizer = ChessTokenizer()
-    dataset = tokenizer.import_data(filename="test.txt")
+    texts = ["a2g4 a6f5 d2d4 d8d2", "a2g4 5h6g, d4d5"]
+    tokenizer.fit_on_texts(texts)
+    phrase_test = ["a2g4 "]
+    token = tokenizer(phrase_test)
 
-    embedder = TextEmbedder(vocab_size=63*64, depth_emb=10)
-    for batch, (boards, move_to_play, moves_mem) in enumerate(dataset):
-        print(type(boards))
-        embedded = embedder(boards)
-        print(type(embedded))
-        print(embedded)
-
-        print(boards[0])
-        print(embedded[0])
-
-        print(boards[1])
-        print(embedded[1])
-
-        if batch >= 0:
-            break
+    embedder = TextEmbedder(vocab_size=60, depth_emb=10)
+    embedded = embedder(token)
+    print(embedded)
 
     print('ok')
