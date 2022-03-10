@@ -2,7 +2,6 @@
 #                   Decoder
 # ------------------------------------------------------
 
-from json import decoder
 import numpy as np
 import tensorflow as tf
 import os
