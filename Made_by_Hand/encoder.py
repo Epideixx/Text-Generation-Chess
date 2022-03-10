@@ -10,6 +10,7 @@ from attention import MultiHeadAttention
 
 from embedding import TextEmbedder
 from tokenizer import ChessTokenizer
+from import_data import import_data
 
 
 class EncoderBlock(tf.keras.Model):
@@ -135,17 +136,18 @@ if __name__ == '__main__':
     encoder = Encoder(vocab_size=vocab_size, model_size=model_size)
 
     tokenizer = ChessTokenizer()
-    dataset = tokenizer.import_data(filename="test.txt")
+    dataset = import_data(filename="test.txt")
 
     embedder = TextEmbedder(vocab_size=vocab_size, depth_emb=model_size)
-    for batch, (boards, move_to_play, moves_mem) in enumerate(dataset):
-        embedded = embedder(boards)
 
-        encoder_output, attention = encoder(embedded)
+    boards, move_to_play, moves_mem = zip(*dataset)
 
-        print(encoder_output)
+    tokenizer.fit_on_texts(boards)
+    tok_boards = tokenizer(boards[0:15])
+    embedded = embedder(tok_boards)
 
-        if batch >= 0:
-            break
+    encoder_output, attention = encoder(embedded)
+
+    print(encoder_output)
 
     print("ok")
