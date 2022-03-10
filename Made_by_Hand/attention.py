@@ -6,6 +6,7 @@
 import tensorflow as tf
 from embedding import TextEmbedder
 from tokenizer import ChessTokenizer
+from import_data import import_data
 
 
 class MultiHeadAttention(tf.keras.Model):
@@ -114,26 +115,34 @@ class MultiHeadAttention(tf.keras.Model):
 if __name__ == '__main__':
 
     tokenizer = ChessTokenizer()
-    dataset = tokenizer.import_data(filename="test.txt")
+    dataset = import_data(filename="test.txt")
 
     embedder = TextEmbedder(vocab_size=63*64, depth_emb=10)
     multi_attention = MultiHeadAttention(model_size=40)
 
-    for batch, (boards, move_to_play, moves_mem) in enumerate(dataset):
+    boards, move_to_play, moves_mem = zip(*dataset)
+    print(boards[0])
+    print(move_to_play[0])
 
-        embedded_boards = embedder(boards)
-        print(embedded_boards)
-        embedded_moves = embedder(move_to_play)
-        print(embedded_moves)
-        output, attention = multi_attention(
-            embedded_moves, embedded_boards, embedded_boards)
+    tokenizer.fit_on_texts(boards)
+    tokenized_boards = tokenizer(boards[0:15])
+    print(len(tokenized_boards))
+    print(tokenized_boards)
+    embedded_boards = embedder(tokenized_boards)
+    print(embedded_boards)
+    print(tokenizer.tokenizer.word_index)
 
-        print(output)
-        print(attention)
+    tokenizer.fit_on_texts(move_to_play)
+    tokenized_moves = tokenizer(move_to_play[0:15])
+    embedded_moves = embedder(tokenized_moves)
+    print(embedded_moves[0])
+    output, attention = multi_attention(
+        embedded_moves, embedded_boards, embedded_boards)
 
-        print(embedder.summary())
-        print(multi_attention.summary())
-        if batch >= 0:
-            break
+    print(output[0])
+    print(attention[0])
+
+    print(embedder.summary())
+    print(multi_attention.summary())
 
     print('ok')
