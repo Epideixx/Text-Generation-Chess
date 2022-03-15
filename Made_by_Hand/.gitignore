@@ -1,7 +1,7 @@
 test.txt
 checkpoint
 __pycache__
-./wandb
+wandb
 
 # Because too large files 
 /pgn
