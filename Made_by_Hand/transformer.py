@@ -169,7 +169,13 @@ class Transformer(tf.keras.Model):
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
 
+                if batch > 5:
+                    print(self.summary())
+
                 wandb.log({"train_loss": loss, "train_accuracy": accuracy})
+
+    def build(self):
+        pass
 
 
 # Test
