@@ -1,11 +1,11 @@
 Ceci sont les différentes idées que j'ai et qu'il faut implémenter:
-- Mettre en place un transformer "classique"
-- En entrée de l'encoder, il y aura le plateau actuel, représenter sous la forme ...r.Q..//.PRBR...// etc où il faut que chaque lettre soit tokenize
-- En entrée du décodeur, il y aura la succession des coups alors joués
-- En sortie, sachant qu'il y a au maximum 218 coups possibles, le vocab de sortie est ainsi limité à ce nombre et il faut estimé quel coup à le plus de proba de sortir done:
-    - Sortie 1 : vecteur de 218 pour savoir quel coup jouer
-    - Sortie 2 : vecteur de taille 1 pour savoir la proba de gagner
-- Pour les données utilisées, on récupère toutes les parties et on s'assure que tout se qui passe à l'entraînement sert à faire gagner le joueur (pour l'instant)
+- Mettre en place un transformer "classique" ==> IN PROGRESS
+- En entrée de l'encoder, il y aura le plateau actuel, représenter sous la forme ...r.Q..//.PRBR...// etc où il faut que chaque lettre soit tokenize ==> DONE
+- En entrée du décodeur, il y aura la succession des coups alors joués ==> DONE
+- En sortie, sachant qu'il y a au maximum 218 coups possibles, le vocab de sortie est ainsi limité à ce nombre et il faut estimé quel coup à le plus de proba de sortir done: FALSE
+    - Sortie 1 : vecteur de ... pour savoir quel coup jouer DONE
+    - Sortie 2 : vecteur de taille 1 pour savoir la proba de gagner NOT DONE
+- Pour les données utilisées, on récupère toutes les parties et on s'assure que tout se qui passe à l'entraînement sert à faire gagner le joueur (pour l'instant) DONE
 
 Autres idées :
 - On va utiliser 3 Transformers différents : 
@@ -29,3 +29,9 @@ Papiers à voir :
 Problèmes :
 - gradients trop faibles voire nuls
 - loss exactement PAREIL à chaque fois 8.303
+
+Pour Refactor :
+- Réaliser chaque partie du Transformer DONE
+- Réaliser la Pipeline qui prend en entrée le plateau et les précédents moves et retourne le coup à jouer PSEUDO DONE
+- Réaliser l'entraînement du modèle
+- Rajouter les couches de Dropout

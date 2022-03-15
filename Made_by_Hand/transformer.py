@@ -101,18 +101,43 @@ class Transformer(tf.keras.Model):
 
         return output
 
+    def predict(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
+        """
+        Parameters
+        ----------
+        input_encoder : tf.Tensor
+            Textual input of the encoder
+        input_decoder : tf.Tensor
+            Textual input of the decdoder
+
+        Returns
+        -------
+        output : tf.Tensor
+            TO COMPLETE
+        """
+
+        output = self.__call__(input_encoder=input_encoder,
+                               input_decoder=input_decoder)
+        output = tf.argmax(output, axis=-1)
+        print(output.numpy())
+        print(self.decoder_tokenize.tokenizer.index_word)
+        output = tf.concat([self.decoder_tokenize.tokenizer.index_word[output.numpy()[
+            i][0]] for i in range(output.shape[0])], axis=0)
+
+        return output
+
 
 # Test
 if __name__ == '__main__':
 
     # ---- Test 1 ----
-    transfo = Transformer()
+    transfo = Transformer(vocab_moves=570)
 
     dataset = import_data(filename="test.txt")
     boards, move_to_play, moves_mem = zip(*dataset)
 
-    output = transfo(boards[0:45], moves_mem[0:45])
-    print(output.shape)
+    output = transfo.predict(boards[0:45], moves_mem[0:45])
+    print("Le transformateur prédit : ", output)
 
     print('ok')
 
