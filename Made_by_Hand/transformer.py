@@ -115,6 +115,7 @@ class Encoder(tf.keras.Model):
             vocab_size, model_size)  # TO EXPLORE
 
         # num_layers Multi-Head Attention and Normalization layers
+        self.norm_input = tf.keras.layers.BatchNormalization()
         self.attention = [MultiHeadAttention(
             model_size, h) for _ in range(num_layers)]
         self.attention_norm = [tf.keras.layers.BatchNormalization()
@@ -138,8 +139,7 @@ class Encoder(tf.keras.Model):
         embed_out += pes[:sequence.shape[1], :]
 
         sub_in = embed_out
-
-        print(sub_in)
+        sub_in = self.norm_input(sub_in)
 
         # MULTIHEAD ATTENTION
         # We will have num_layers of (Attention + FFN)
@@ -191,6 +191,8 @@ class Decoder(tf.keras.Model):
         self.h = h  # Number of heads
         self.pes = pes
         self.embedding = tf.keras.layers.Embedding(vocab_size, model_size)
+        self.norm_input = tf.keras.layers.BatchNormalization()
+
         self.attention_bot = [MultiHeadAttention(
             model_size, h) for _ in range(num_layers)]
         self.attention_bot_norm = [
@@ -218,7 +220,7 @@ class Decoder(tf.keras.Model):
 
         bot_sub_in = embed_out
 
-        print(bot_sub_in)
+        bot_sub_in = self.norm_input(bot_sub_in)
 
         for i in range(self.num_layers):
             # BOTTOM MULTIHEAD SUB LAYER
@@ -315,7 +317,7 @@ class Transformer():
 
         moves_to_play = self.tokenizer_moves.texts_to_sequences(moves_to_play)
         moves_to_play = tf.keras.preprocessing.sequence.pad_sequences(
-            moves_to_play, padding='post', maxlen=4)  # maxlen = 2
+            moves_to_play, padding='post', maxlen=2)
 
         mem_moves = self.tokenizer_moves.texts_to_sequences(mem_moves)
         mem_moves = tf.keras.preprocessing.sequence.pad_sequences(

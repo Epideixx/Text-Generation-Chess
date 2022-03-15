@@ -1,0 +1,24 @@
+{
+    "os": "Windows-10-10.0.19041-SP0",
+    "python": "3.9.0",
+    "heartbeatAt": "2022-03-15T21:04:38.156846",
+    "startedAt": "2022-03-15T21:04:33.407941",
+    "docker": null,
+    "gpu": "NVIDIA GeForce GTX 1650",
+    "gpu_count": 1,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "c:\\Users\\jonat\\OneDrive\\Documents\\CentraleSupelec\\2A\\Echecs2A\\Text-Generation-Chess\\Made_by_Hand\\training.py",
+    "codePath": "Made_by_Hand\\training.py",
+    "git": {
+        "remote": "https://github.com/Epideixx/Text-Generation-Chess.git",
+        "commit": "f8d68f77869cfcce6bd0a681fa0d6652ebb4f92a"
+    },
+    "email": "jonathan.poli@student-cs.fr",
+    "root": "C:/Users/jonat/OneDrive/Documents/CentraleSupelec/2A/Echecs2A/Text-Generation-Chess",
+    "host": "DESKTOP-3636OQ0",
+    "username": "jonat",
+    "executable": "C:\\Users\\jonat\\AppData\\Local\\Programs\\Python\\Python39\\python.exe"
+}
