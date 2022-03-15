@@ -35,6 +35,8 @@ class DecoderBlock(tf.keras.Model):
         self.model_size = model_size
         self.h = h
 
+        self.input_norm = tf.keras.layers.LayerNormalization(epsilon=1e-6)
+
         # (Masked) Multi-Head Attention and Normalization
         self.masked_attention = MultiHeadAttention(self.model_size, self.h)
         self.masked_attention_norm = tf.keras.layers.BatchNormalization()
@@ -65,17 +67,18 @@ class DecoderBlock(tf.keras.Model):
         -------
         """
 
+        input_norm = self.input_norm(input)
         masked_mha_output, masked_attention_block = self.attention(
-            input, input, input, padding_mask)
-        add_norm_1 = input + masked_mha_output  # Residual connection
-        add_norm_1 = self.attention_norm(add_norm_1)  # Normalization
+            input_norm, input_norm, input_norm, padding_mask)
+        add_1 = input + masked_mha_output  # Residual connection
+        add_norm_1 = self.attention_norm(add_1)  # Normalization
 
         Q_mha = add_norm_1
 
         mha_output, attention_block = self.masked_attention(
             Q_mha, encoder_output, encoder_output, padding_mask)
-        add_norm_2 = input + mha_output  # Residual connection
-        add_norm_2 = self.attention_norm(add_norm_2)  # Normalization
+        add_2 = add_1 + mha_output  # Residual connection
+        add_norm_2 = self.attention_norm(add_2)  # Normalization
 
         ffn_in = add_norm_2
 

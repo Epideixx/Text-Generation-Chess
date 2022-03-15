@@ -34,6 +34,8 @@ class EncoderBlock(tf.keras.Model):
         self.model_size = model_size
         self.h = h
 
+        self.input_norm = tf.keras.layers.LayerNormalization(epsilon=1e-6)
+
         # Multi-Head Attention and Normalization
         self.attention = MultiHeadAttention(self.model_size, self.h)
         self.attention_norm = tf.keras.layers.BatchNormalization()
@@ -57,17 +59,17 @@ class EncoderBlock(tf.keras.Model):
         Returns
         -------
         """
-
+        input_norm = self.input_norm(input)
         mha_output, attention_block = self.attention(
-            input, input, input, padding_mask)
-        add_norm_1 = input + mha_output  # Residual connection
-        add_norm_1 = self.attention_norm(add_norm_1)  # Normalization
+            input_norm, input_norm, input_norm, padding_mask)
+        add_1 = input + mha_output  # Residual connection
+        add_norm_1 = self.attention_norm(add_1)  # Normalization
 
         ffn_in = add_norm_1
 
         ffn_out = self.dense_1(ffn_in)
         ffn_out = self.dense_2(ffn_out)
-        ffn_out = ffn_in + ffn_out
+        ffn_out = add_1 + ffn_out
         ffn_out = self.ffn_norm(ffn_out)
 
         block_output = ffn_out

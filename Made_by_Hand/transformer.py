@@ -167,6 +167,7 @@ class Transformer(tf.keras.Model):
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
 
+                print(self.predict([". . . . ."], ["a2b8 <end>"]))
                 print("La loss vaut : ", loss)
                 print("L'accuracy vaut : ", accuracy)
 
