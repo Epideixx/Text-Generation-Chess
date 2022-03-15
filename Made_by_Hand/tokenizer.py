@@ -8,13 +8,20 @@ class ChessTokenizer(tf.keras.Model):
 
     def __init__(self):
 
+        super(ChessTokenizer, self).__init__()
         self.tokenizer = tf.keras.preprocessing.text.Tokenizer(
             filters='', lower=False)
 
     def fit_on_texts(self, text):
+        if not(type(text) == list or type(text) == str):
+            text = text.numpy().tolist()
+            text = [e.decode("utf-8") for e in text]
         self.tokenizer.fit_on_texts(text)
 
     def __call__(self, text, maxlen=None):
+        if not(type(text) == list or type(text) == str):
+            text = text.numpy().tolist()
+            text = [e.decode("utf-8") for e in text]
         tokens = self.tokenizer.texts_to_sequences(text)
         tokens = tf.keras.preprocessing.sequence.pad_sequences(
             tokens, padding='post', maxlen=maxlen)

@@ -10,3 +10,4 @@
 
 Possiblement utile pour recoder transformer :
 - https://www.tensorflow.org/text/tutorials/transformer
+- https://github.com/valentingol/ : Code de Valentin qui m'a beaucoup aidé

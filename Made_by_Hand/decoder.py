@@ -106,7 +106,7 @@ class Decoder(tf.keras.Model):
         num_encoder : int, default = 2
             Number of decoders
         """
-        super().__init__()
+        super(Decoder, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
         self.h = h

@@ -21,7 +21,7 @@ class PositionalEncoding(tf.keras.Model):
         depth : int
             Depth of the Embedding layer
         """
-        super().__init__()
+        super(PositionalEncoding, self).__init__()
         self.seq_length = seq_length
         self.depth = depth
 

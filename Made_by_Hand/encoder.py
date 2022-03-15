@@ -92,7 +92,7 @@ class Encoder(tf.keras.Model):
         num_encoder : int, default = 2
             Number of encoders
         """
-        super().__init__()
+        super(Encoder, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
         self.h = h

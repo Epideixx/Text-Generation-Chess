@@ -33,5 +33,8 @@ Problèmes :
 Pour Refactor :
 - Réaliser chaque partie du Transformer DONE
 - Réaliser la Pipeline qui prend en entrée le plateau et les précédents moves et retourne le coup à jouer PSEUDO DONE
+- POUR PROCHAINE FOIS : Il faut aussi fit le tokenizer du decoder sur les outputs ... au cas où il les ait jamais vu ...
 - Réaliser l'entraînement du modèle
+- Se débrouiller pour que la taille du vocab soit automatique ...
 - Rajouter les couches de Dropout
+- Normaliser l'entrée

@@ -34,13 +34,21 @@ if __name__ == '__main__':
     dataset = import_data(filename="test.txt")
     print(dataset[0])
 
-    boards = list(zip(*dataset))[0]
-    print(boards[0])
+    # boards = list(zip(*dataset))[0]
+    # print(boards[0])
 
-    tokenizer = ChessTokenizer()
-    tokenizer.fit_on_texts(boards)
-    phrase_test = boards[2]
-    token = tokenizer(phrase_test)
-    print(token)
+    # tokenizer = ChessTokenizer()
+    # tokenizer.fit_on_texts(boards)
+    # phrase_test = boards[2]
+    # token = tokenizer(phrase_test)
+    # print(token)
 
-    print('ok')
+    # print('ok')
+
+    dataset = list(zip(*dataset))
+    print(len(dataset[2]))
+    dataset = tf.data.Dataset.from_tensor_slices(
+        (list(dataset[0]), list(dataset[1]), list(dataset[2])))
+    dataset = dataset.batch(batch_size=32)
+    print(dataset)
+    print("ok")

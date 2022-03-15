@@ -19,7 +19,7 @@ class TextEmbedder(tf.keras.Model):
             Depth of the embedding, e.g size of each vector representing a token
         """
 
-        super().__init__()
+        super(TextEmbedder, self).__init__()
         self.vocab_size = vocab_size
         self.depth = depth_emb
         self.embedding = tf.keras.layers.Embedding(

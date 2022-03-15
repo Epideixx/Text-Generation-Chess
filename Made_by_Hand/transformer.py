@@ -10,6 +10,8 @@ from embedding import TextEmbedder
 from positional_encoding import PositionalEncoding
 from encoder import Encoder
 from decoder import Decoder
+from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy
+
 
 from import_data import import_data
 
@@ -59,6 +61,12 @@ class Transformer(tf.keras.Model):
         # Final layer to associate the data to one word
         self.final = tf.keras.layers.Dense(vocab_moves, activation="softmax")
 
+        # For training ==> TO MAKE EVOLVE
+        self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
+                                                  epsilon=1e-9)
+        self.accuracy = MaskedAccuracy()
+        self.loss = MaskedSparseCategoricalEntropy()
+
     def __call__(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
         """
         Parameters
@@ -92,8 +100,6 @@ class Transformer(tf.keras.Model):
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=None)  # For the moment
 
-        print("Juste pour vérifier : ", output_decoder.shape)
-
         # Not sure about this part
         output = tf.keras.layers.Flatten()(output_decoder)
         output = tf.concat([tf.expand_dims(self.final(output), axis=1)
@@ -119,18 +125,57 @@ class Transformer(tf.keras.Model):
         output = self.__call__(input_encoder=input_encoder,
                                input_decoder=input_decoder)
         output = tf.argmax(output, axis=-1)
-        print(output.numpy())
-        print(self.decoder_tokenize.tokenizer.index_word)
+
         output = tf.concat([self.decoder_tokenize.tokenizer.index_word[output.numpy()[
             i][0]] for i in range(output.shape[0])], axis=0)
 
         return output
+
+    def train_step(self, encoder_inputs, transfo_real_outputs, decoder_inputs):
+
+        with tf.GradientTape() as tape:
+
+            transfo_predict_outputs = self.__call__(
+                encoder_inputs, decoder_inputs)
+            transfo_real_outputs = self.decoder_tokenize(transfo_real_outputs)
+            loss = self.loss(transfo_real_outputs,
+                             transfo_predict_outputs)
+
+        gradients = tape.gradient(loss, self.trainable_variables)
+        self.optimizer.apply_gradients(
+            zip(gradients, self.trainable_variables))
+        accuracy = self.accuracy(
+            transfo_real_outputs, transfo_predict_outputs)
+
+        return loss, accuracy
+
+    def train(self, dataset: list, batch_size: int = 32, num_epochs: int = 1):
+
+        dataset = list(zip(*dataset))
+        self.encoder_tokenize.fit_on_texts(list(dataset[0]))
+        self.decoder_tokenize.fit_on_texts(list(dataset[1]))
+        self.decoder_tokenize.fit_on_texts(list(dataset[2]))
+
+        dataset = tf.data.Dataset.from_tensor_slices(
+            (list(dataset[0]), list(dataset[1]), list(dataset[2])))
+        dataset = dataset.shuffle(20).batch(batch_size=batch_size)
+
+        for _ in range(num_epochs):
+
+            for batch, (encoder_inputs, transfo_real_outputs, decoder_inputs) in enumerate(dataset):
+
+                loss, accuracy = self.train_step(
+                    encoder_inputs, transfo_real_outputs, decoder_inputs)
+
+                print("La loss vaut : ", loss)
+                print("L'accuracy vaut : ", accuracy)
 
 
 # Test
 if __name__ == '__main__':
 
     # ---- Test 1 ----
+    """
     transfo = Transformer(vocab_moves=570)
 
     dataset = import_data(filename="test.txt")
@@ -140,6 +185,16 @@ if __name__ == '__main__':
     print("Le transformateur prédit : ", output)
 
     print('ok')
+    """
 
     # Vérifier les shapes ... ==> En gros faut juste se démerder pour flatten ou un truc comme ça
     # Penser à supprimer les print dans le code
+
+    # ---- Test 2 ----
+    transfo = Transformer(vocab_moves=2000)
+
+    dataset = import_data(filename="test.txt")
+
+    transfo.train(dataset)
+
+    print("ok")
