@@ -3,6 +3,7 @@
 # ------------------------------------------------------
 
 import tensorflow as tf
+import numpy as np
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -15,9 +16,25 @@ from import_data import import_data
 
 class Transformer(tf.keras.Model):
 
-    def __init__(self, vocab_board=15, vocab_moves=500, model_size=10, max_moves_in_game=300, length_board=127, num_layers=2, h=8):
+    def __init__(self, vocab_board=15, vocab_moves=2000, model_size=10, max_moves_in_game=300, length_board=127, num_layers=2, h=8):
         """
-        TO COMPLETE
+        Parameters
+        ----------
+        vocab_board : int, default = 15
+            Vocab size of the chess pieces
+        vocab_moves : int, default = 2000
+            Vocab size of possible moves
+        model_size : int, default = 10
+            Depth of the embedding model
+        max_moves_in_game : int, default = 300
+            Max number of moves in a game
+        length_board : int, default = 127
+            Size of the encoding of the board
+        num_layers : int, default = 2
+            Number of encoders et of decoders
+        h : int, default = 10
+            Number of heads in the Multi Head Attention method
+
         """
         super(Transformer, self).__init__()
         self.max_moves_in_game = max_moves_in_game
@@ -43,6 +60,19 @@ class Transformer(tf.keras.Model):
         self.final = tf.keras.layers.Dense(vocab_moves, activation="softmax")
 
     def __call__(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
+        """
+        Parameters
+        ----------
+        input_encoder : tf.Tensor
+            Textual input of the encoder
+        input_decoder : tf.Tensor
+            Textual input of the decdoder
+
+        Returns
+        -------
+        output : tf.Tensor
+            TO COMPLETE
+        """
 
         self.encoder_tokenize.fit_on_texts(input_encoder)
         tok_encoder = self.encoder_tokenize(
@@ -62,8 +92,12 @@ class Transformer(tf.keras.Model):
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=None)  # For the moment
 
-        # To continue but first a small test
-        output = self.final(output_decoder)
+        print("Juste pour vérifier : ", output_decoder.shape)
+
+        # Not sure about this part
+        output = tf.keras.layers.Flatten()(output_decoder)
+        output = tf.concat([tf.expand_dims(self.final(output), axis=1)
+                           for _ in range(2)], axis=1)  # Because move + <end>
 
         return output
 
@@ -77,7 +111,10 @@ if __name__ == '__main__':
     dataset = import_data(filename="test.txt")
     boards, move_to_play, moves_mem = zip(*dataset)
 
-    output = transfo(boards, moves_mem)
-    print(output)
+    output = transfo(boards[0:45], moves_mem[0:45])
+    print(output.shape)
 
     print('ok')
+
+    # Vérifier les shapes ... ==> En gros faut juste se démerder pour flatten ou un truc comme ça
+    # Penser à supprimer les print dans le code
