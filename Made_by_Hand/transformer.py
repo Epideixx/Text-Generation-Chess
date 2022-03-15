@@ -4,6 +4,7 @@
 
 import tensorflow as tf
 import numpy as np
+import wandb
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -102,8 +103,7 @@ class Transformer(tf.keras.Model):
 
         # Not sure about this part
         output = tf.keras.layers.Flatten()(output_decoder)
-        output = tf.concat([tf.expand_dims(self.final(output), axis=1)
-                           for _ in range(2)], axis=1)  # Because move + <end>
+        output = self.final(output)
 
         return output
 
@@ -151,6 +151,8 @@ class Transformer(tf.keras.Model):
 
     def train(self, dataset: list, batch_size: int = 32, num_epochs: int = 1):
 
+        wandb.init(project="Chess-Transformer", entity="epideixx")
+
         dataset = list(zip(*dataset))
         self.encoder_tokenize.fit_on_texts(list(dataset[0]))
         self.decoder_tokenize.fit_on_texts(list(dataset[1]))
@@ -167,9 +169,7 @@ class Transformer(tf.keras.Model):
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
 
-                print(self.predict([". . . . ."], ["a2b8 <end>"]))
-                print("La loss vaut : ", loss)
-                print("L'accuracy vaut : ", accuracy)
+                wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
 
 # Test
