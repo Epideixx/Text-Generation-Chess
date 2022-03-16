@@ -27,14 +27,15 @@ Papiers à voir :
 - Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, and Yann N. Dauphin. Convolutional sequence to sequence learning. arXiv preprint arXiv:1705.03122v2, 2017.
 
 Problèmes :
-- gradients trop faibles voire nuls
-- loss exactement PAREIL à chaque fois 8.303
+- gradients trop faibles voire nuls SOLVE
+- loss exactement PAREIL à chaque fois 8.303 SOLVE
 
 Pour Refactor :
 - Réaliser chaque partie du Transformer DONE
 - Réaliser la Pipeline qui prend en entrée le plateau et les précédents moves et retourne le coup à jouer PSEUDO DONE
-- POUR PROCHAINE FOIS : Il faut aussi fit le tokenizer du decoder sur les outputs ... au cas où il les ait jamais vu ...
+- POUR PROCHAINE FOIS : Il faut aussi fit le tokenizer du decoder sur les outputs ... au cas où il les ait jamais vu ... DONE BUT NOT PERFECT
+- Réaliser la sauvegarde du modèle
 - Réaliser l'entraînement du modèle
 - Se débrouiller pour que la taille du vocab soit automatique ...
 - Rajouter les couches de Dropout
-- Normaliser l'entrée
+- Normaliser l'entrée DONE

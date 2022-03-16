@@ -43,7 +43,6 @@ class Transformer(tf.keras.Model):
         self.max_moves_in_game = max_moves_in_game
         self.length_board = length_board
 
-        self.encoder_tokenize = ChessTokenizer()
         self.encoder_embedding = TextEmbedder(
             vocab_size=vocab_board, depth_emb=model_size)
         self.encoder_PE = PositionalEncoding(
@@ -51,7 +50,6 @@ class Transformer(tf.keras.Model):
         self.encoder = Encoder(
             vocab_size=vocab_board, model_size=model_size, h=h, num_encoder=num_layers)
 
-        self.decoder_tokenize = ChessTokenizer()
         self.decoder_embedding = TextEmbedder(
             vocab_size=vocab_moves, depth_emb=model_size)
         self.decoder_PE = PositionalEncoding(
@@ -73,9 +71,9 @@ class Transformer(tf.keras.Model):
         Parameters
         ----------
         input_encoder : tf.Tensor
-            Textual input of the encoder
+            Tokenized input of the encoder
         input_decoder : tf.Tensor
-            Textual input of the decdoder
+            Tokenized input of the decdoder
 
         Returns
         -------
@@ -83,18 +81,14 @@ class Transformer(tf.keras.Model):
             TO COMPLETE
         """
 
-        self.encoder_tokenize.fit_on_texts(input_encoder)
-        tok_encoder = self.encoder_tokenize(
-            input_encoder, maxlen=self.length_board)
+        tok_encoder = input_encoder
         emb_encoder = self.encoder_embedding(tok_encoder)
         pes_encoder = self.encoder_PE()
         in_encoder = emb_encoder + pes_encoder
         output_encoder, attention_encoder = self.encoder(
             in_encoder, padding_mask=None)  # For the moment
 
-        self.decoder_tokenize.fit_on_texts(input_decoder)
-        tok_decoder = self.decoder_tokenize(
-            input_decoder, maxlen=self.max_moves_in_game)
+        tok_decoder = input_decoder
         emb_decoder = self.decoder_embedding(tok_decoder)
         pes_decoder = self.decoder_PE()
         in_decoder = emb_decoder + pes_decoder
@@ -112,9 +106,9 @@ class Transformer(tf.keras.Model):
         Parameters
         ----------
         input_encoder : tf.Tensor
-            Textual input of the encoder
+            Tokenized input of the encoder
         input_decoder : tf.Tensor
-            Textual input of the decdoder
+            Tokenized input of the decdoder
 
         Returns
         -------
@@ -126,8 +120,7 @@ class Transformer(tf.keras.Model):
                                input_decoder=input_decoder)
         output = tf.argmax(output, axis=-1)
 
-        output = tf.concat([self.decoder_tokenize.tokenizer.index_word[output.numpy()[
-            i][0]] for i in range(output.shape[0])], axis=0)
+        output = [output.numpy()[i][0] for i in range(output.shape[0])]
 
         return output
 
@@ -137,7 +130,6 @@ class Transformer(tf.keras.Model):
 
             transfo_predict_outputs = self.__call__(
                 encoder_inputs, decoder_inputs)
-            transfo_real_outputs = self.decoder_tokenize(transfo_real_outputs)
             loss = self.loss(transfo_real_outputs,
                              transfo_predict_outputs)
 
@@ -149,33 +141,22 @@ class Transformer(tf.keras.Model):
 
         return loss, accuracy
 
-    def train(self, dataset: list, batch_size: int = 32, num_epochs: int = 1):
+    def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, wandb_api=True):
 
-        wandb.init(project="Chess-Transformer", entity="epideixx")
+        if wandb_api:
+            wandb.init(project="Chess-Transformer", entity="epideixx")
 
-        dataset = list(zip(*dataset))
-        self.encoder_tokenize.fit_on_texts(list(dataset[0]))
-        self.decoder_tokenize.fit_on_texts(list(dataset[1]))
-        self.decoder_tokenize.fit_on_texts(list(dataset[2]))
-
-        dataset = tf.data.Dataset.from_tensor_slices(
-            (list(dataset[0]), list(dataset[1]), list(dataset[2])))
-        dataset = dataset.shuffle(20).batch(batch_size=batch_size)
+        dataset = tf.data.Dataset.zip((x, y))
+        dataset = dataset.shuffle(32000).batch(batch_size=batch_size)
 
         for _ in range(num_epochs):
 
-            for batch, (encoder_inputs, transfo_real_outputs, decoder_inputs) in enumerate(dataset):
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(dataset):
 
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
-
-                if batch > 5:
-                    print(self.summary())
-
-                wandb.log({"train_loss": loss, "train_accuracy": accuracy})
-
-    def build(self):
-        pass
+                if wandb_api:
+                    wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
 
 # Test
@@ -198,7 +179,8 @@ if __name__ == '__main__':
     # Penser à supprimer les print dans le code
 
     # ---- Test 2 ----
-    transfo = Transformer(vocab_moves=2000)
+    transfo = Transformer(vocab_moves=64*(7*4 + 8),
+                          length_board=64, num_layers=4)
 
     dataset = import_data(filename="test.txt")
 

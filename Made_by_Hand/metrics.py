@@ -51,7 +51,8 @@ class MaskedAccuracy(object):
             equal to 0.
         """
         mask = tf.not_equal(y_true, 0)
-        good_preds = tf.equal(y_true, tf.argmax(y_pred, axis=-1))
+        good_preds = tf.equal(y_true, tf.cast(
+            tf.argmax(y_pred, axis=-1), dtype=tf.int32))
         good_preds = tf.cast(tf.logical_and(mask, good_preds), tf.float32)
         mask = tf.cast(mask, tf.float32)
         acc = tf.reduce_sum(good_preds) / (tf.reduce_sum(mask) + 1e-8)

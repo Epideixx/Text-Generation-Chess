@@ -1,34 +1,38 @@
-# Main file to train the Transformer model
+# ------------------------------------------------------
+#                   Training
+# ------------------------------------------------------
 
-import os
-import re
-import tokenizers
-from tqdm import tqdm
-import wandb
 import tensorflow as tf
-import time
-import numpy as np
-
 from transformer import Transformer
+from import_data import import_data
+from tokenizer import ChessTokenizer
 
-# wandb.init(project="Chess-Transformer", entity="epideixx")
+length_board = 64
+max_moves_in_game = 300
+vocab_moves = 64*(7*4 + 8)
 
-transformer = Transformer()
-dataset = transformer.import_data("test.txt")
+transfo = Transformer(vocab_moves=vocab_moves,
+                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4)
 
-NUM_EPOCHS = 100
+dataset = import_data(filename="test.txt")
+dataset = list(zip(*dataset))
 
+encoder_tokenize = ChessTokenizer()
+decoder_tokenize = ChessTokenizer()
 
-for e in range(NUM_EPOCHS):
-    for batch, (boards, encoded_move_to_play, encoded_mem_moves) in enumerate(dataset):
+encoder_tokenize.fit_on_texts(list(dataset[0]))
+decoder_tokenize.fit_on_texts(list(dataset[1]))
+decoder_tokenize.fit_on_texts(list(dataset[2]))
 
-        # print(boards[1])
-        # print(encoded_move_to_play[1])
-        # print(encoded_mem_moves[1])
+tok_encoder = encoder_tokenize(
+    list(dataset[0]), maxlen=length_board)
+tok_decoder = decoder_tokenize(
+    list(dataset[2]), maxlen=max_moves_in_game)
+tok_output = decoder_tokenize(
+    list(dataset[1]))
 
-        loss = transformer.train_step(boards, encoded_mem_moves,
-                                      encoded_move_to_play)
+x = tf.data.Dataset.from_tensor_slices(
+    (tok_encoder, tok_decoder))
+y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-        # transformer.save()
-
-        # wandb.log({"train_loss": loss})
+transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=True)
