@@ -39,3 +39,4 @@ Pour Refactor :
 - Se débrouiller pour que la taille du vocab soit automatique ...
 - Rajouter les couches de Dropout
 - Normaliser l'entrée DONE
+- Créer une fonction call(self, x : tf.Tensor) ==> Voir Internet

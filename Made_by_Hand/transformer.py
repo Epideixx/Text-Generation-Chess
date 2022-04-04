@@ -2,6 +2,7 @@
 #                   Transformer
 # ------------------------------------------------------
 
+from black import out
 import tensorflow as tf
 import numpy as np
 import wandb
@@ -65,6 +66,21 @@ class Transformer(tf.keras.Model):
                                                   epsilon=1e-9)
         self.accuracy = MaskedAccuracy()
         self.loss = MaskedSparseCategoricalEntropy()
+
+    def call(self, input):
+        """
+        Parameters
+        ----------
+        input :  (tf.Tensor, tf.Tensor)
+            (Tokenized input of the encoder, Tokenized input of the decoder
+
+        Returns
+        -------
+        output : tf.Tensor
+            TO COMPLETE
+        """
+        input_encoder, input_decoder = input
+        return self.__call__(input_encoder=input_encoder, input_decoder=input_decoder)
 
     def __call__(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
         """
@@ -158,6 +174,10 @@ class Transformer(tf.keras.Model):
                 if wandb_api:
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
+                # Pour test :
+                if batch == 0:
+                    break
+
 
 # Test
 if __name__ == '__main__':
@@ -179,11 +199,35 @@ if __name__ == '__main__':
     # Penser à supprimer les print dans le code
 
     # ---- Test 2 ----
-    transfo = Transformer(vocab_moves=64*(7*4 + 8),
-                          length_board=64, num_layers=4)
+    length_board = 64
+    max_moves_in_game = 300
+    vocab_moves = 64*(7*4 + 8)
+
+    transfo = Transformer(vocab_moves=vocab_moves,
+                          length_board=length_board, num_layers=4)
 
     dataset = import_data(filename="test.txt")
 
-    transfo.train(dataset)
+    data = dataset[:45]
+    enc_input = [x[0] for x in dataset[:45]]
+    dec_input = [x[2] for x in dataset[:45]]
+
+    encoder_tokenize = ChessTokenizer()
+    decoder_tokenize = ChessTokenizer()
+
+    encoder_tokenize.fit_on_texts(enc_input)
+    decoder_tokenize.fit_on_texts(dec_input)
+
+    enc_input = encoder_tokenize(
+        enc_input, maxlen=length_board)
+    dec_input = decoder_tokenize(
+        dec_input, maxlen=max_moves_in_game)
+
+    output_decoder = transfo.call((enc_input, dec_input))
+    print(output_decoder)
+
+    transfo.build(input_shape=[enc_input.shape, dec_input.shape])  # Chelou ...
+    # print(transfo.summary())
+    print(transfo.encoder.encoder_block[0].summary())
 
     print("ok")
