@@ -80,23 +80,6 @@ class Transformer(tf.keras.Model):
             TO COMPLETE
         """
         input_encoder, input_decoder = input
-        return self.__call__(input_encoder=input_encoder, input_decoder=input_decoder)
-
-    def __call__(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
-        """
-        Parameters
-        ----------
-        input_encoder : tf.Tensor
-            Tokenized input of the encoder
-        input_decoder : tf.Tensor
-            Tokenized input of the decdoder
-
-        Returns
-        -------
-        output : tf.Tensor
-            TO COMPLETE
-        """
-
         tok_encoder = input_encoder
         emb_encoder = self.encoder_embedding(tok_encoder)
         pes_encoder = self.encoder_PE()
@@ -131,9 +114,8 @@ class Transformer(tf.keras.Model):
         output : tf.Tensor
             TO COMPLETE
         """
-
-        output = self.__call__(input_encoder=input_encoder,
-                               input_decoder=input_decoder)
+        input = input_encoder, input_decoder
+        output = self(input=input)
         output = tf.argmax(output, axis=-1)
 
         output = [output.numpy()[i][0] for i in range(output.shape[0])]
@@ -144,8 +126,8 @@ class Transformer(tf.keras.Model):
 
         with tf.GradientTape() as tape:
 
-            transfo_predict_outputs = self.__call__(
-                encoder_inputs, decoder_inputs)
+            input = encoder_inputs, decoder_inputs
+            transfo_predict_outputs = self(input=input)
             loss = self.loss(transfo_real_outputs,
                              transfo_predict_outputs)
 
@@ -228,6 +210,6 @@ if __name__ == '__main__':
 
     transfo.build(input_shape=[enc_input.shape, dec_input.shape])  # Chelou ...
     # print(transfo.summary())
-    print(transfo.encoder.encoder_block[0].summary())
+    print(transfo.summary())
 
     print("ok")

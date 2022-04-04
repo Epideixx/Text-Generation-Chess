@@ -47,7 +47,7 @@ class EncoderBlock(tf.keras.Model):
             self.model_size)
         self.ffn_norm = tf.keras.layers.BatchNormalization()
 
-    def __call__(self, input: tf.Tensor, padding_mask: tf.Tensor = None):
+    def call(self, input: tf.Tensor, padding_mask: tf.Tensor = None):
         """
         Parameters
         ----------
@@ -103,7 +103,7 @@ class Encoder(tf.keras.Model):
         self.encoder_block = [EncoderBlock(
             vocab_size, model_size, h) for _ in range(num_encoder)]
 
-    def __call__(self, input: tf.Tensor, padding_mask: tf.Tensor = None):
+    def call(self, input: tf.Tensor, padding_mask: tf.Tensor = None):
         """
         Pass throught the Encoder
 
