@@ -7,7 +7,7 @@ import tensorflow as tf
 from tokenizer import ChessTokenizer
 
 
-class TextEmbedder(tf.keras.Model):
+class TextEmbedder(tf.keras.layers.Embedding):
 
     def __init__(self, vocab_size: int, depth_emb: int):
         """"
@@ -19,7 +19,7 @@ class TextEmbedder(tf.keras.Model):
             Depth of the embedding, e.g size of each vector representing a token
         """
 
-        super(TextEmbedder, self).__init__()
+        super(TextEmbedder, self).__init__(vocab_size, depth_emb)
         self.vocab_size = vocab_size
         self.depth = depth_emb
         self.embedding = tf.keras.layers.Embedding(
@@ -30,12 +30,12 @@ class TextEmbedder(tf.keras.Model):
         """
         Parameters
         ----------
-        texts_tokenized : tf.Tensor, shape = (..., max_lenght_token)
+        texts_tokenized : tf.Tensor, shape = (batch_size, max_lenght_token)
             Text already tokenized
 
         Returns
         -------
-        embedding : tf.Tensor, shape = (..., max_lenght_token, depth_emb)
+        embedding : tf.Tensor, shape = (batch_size, max_lenght_token, depth_emb)
             Text embedded
         """
         embedding = self.embedding(texts_tokenized)
