@@ -7,7 +7,6 @@ wandb
 /pgn
 fen.txt
 /transformer
-/test_transfo
 
 # Except
 !./pgn/Adams.pgn

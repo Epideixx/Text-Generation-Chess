@@ -1,5 +1,7 @@
 # Main files 
 wandb
+/test_transfo
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
