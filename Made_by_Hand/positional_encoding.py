@@ -10,7 +10,7 @@ import seaborn as sns
 sns.set_theme()
 
 
-class PositionalEncoding(tf.keras.Model):
+class PositionalEncoding(tf.keras.layers.Layer):
 
     def __init__(self, seq_length: int, depth: int):
         """
