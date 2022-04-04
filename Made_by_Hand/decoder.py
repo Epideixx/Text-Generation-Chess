@@ -168,13 +168,13 @@ if __name__ == '__main__':
     embedder_moves = TextEmbedder(
         vocab_size=vocab_size_moves, depth_emb=model_size)
 
-    boards, move_to_play, moves_mem = zip(*dataset)
+    boards, move_to_play, moves_mem = (list(l) for l in zip(*dataset))
 
     tokenizer.fit_on_texts(boards)
-    tok_boards = tokenizer(boards[0:30], maxlen=15)
+    tok_boards = tokenizer.texts_to_sequences(boards[0:30], maxlen=15)
 
     tokenizer.fit_on_texts(moves_mem)
-    tok_moves_mem = tokenizer(moves_mem[0:30], maxlen=500)
+    tok_moves_mem = tokenizer.texts_to_sequences(moves_mem[0:30], maxlen=500)
 
     boards_embedded = embedder_boards(tok_boards)
     moves_mem_embedded = embedder_moves(tok_moves_mem)

@@ -142,10 +142,10 @@ if __name__ == '__main__':
 
     embedder = TextEmbedder(vocab_size=vocab_size, depth_emb=model_size)
 
-    boards, move_to_play, moves_mem = zip(*dataset)
+    boards, move_to_play, moves_mem = (list(l) for l in zip(*dataset))
 
     tokenizer.fit_on_texts(boards)
-    tok_boards = tokenizer(boards[0:15])
+    tok_boards = tokenizer.texts_to_sequences(boards[0:15])
     embedded = embedder(tok_boards)
 
     encoder_output, attention = encoder(embedded)

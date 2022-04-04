@@ -218,9 +218,9 @@ if __name__ == '__main__':
     encoder_tokenize.fit_on_texts(enc_input)
     decoder_tokenize.fit_on_texts(dec_input)
 
-    enc_input = encoder_tokenize(
+    enc_input = encoder_tokenize.texts_to_sequences(
         enc_input, maxlen=length_board)
-    dec_input = decoder_tokenize(
+    dec_input = decoder_tokenize.texts_to_sequences(
         dec_input, maxlen=max_moves_in_game)
 
     output_decoder = transfo.call((enc_input, dec_input))

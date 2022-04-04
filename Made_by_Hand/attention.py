@@ -3,6 +3,7 @@
 # ------------------------------------------------------
 
 
+from shutil import move
 import tensorflow as tf
 from embedding import TextEmbedder
 from tokenizer import ChessTokenizer
@@ -120,12 +121,12 @@ if __name__ == '__main__':
     embedder = TextEmbedder(vocab_size=63*64, depth_emb=10)
     multi_attention = MultiHeadAttention(model_size=40)
 
-    boards, move_to_play, moves_mem = zip(*dataset)
+    boards, move_to_play, moves_mem = (list(l) for l in zip(*dataset))
     print(boards[0])
     print(move_to_play[0])
 
     tokenizer.fit_on_texts(boards)
-    tokenized_boards = tokenizer(boards[0:15])
+    tokenized_boards = tokenizer.texts_to_sequences(boards[0:15])
     print(len(tokenized_boards))
     print(tokenized_boards)
     embedded_boards = embedder(tokenized_boards)
@@ -133,7 +134,7 @@ if __name__ == '__main__':
     print(tokenizer.tokenizer.word_index)
 
     tokenizer.fit_on_texts(move_to_play)
-    tokenized_moves = tokenizer(move_to_play[0:15])
+    tokenized_moves = tokenizer.texts_to_sequences(move_to_play[0:15])
     embedded_moves = embedder(tokenized_moves)
     print(embedded_moves[0])
     output, attention = multi_attention(

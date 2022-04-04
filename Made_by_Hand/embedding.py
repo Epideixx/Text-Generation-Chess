@@ -48,7 +48,7 @@ if __name__ == '__main__':
     texts = ["a2g4 a6f5 d2d4 d8d2", "a2g4 5h6g, d4d5"]
     tokenizer.fit_on_texts(texts)
     phrase_test = ["a2g4 "]
-    token = tokenizer(phrase_test)
+    token = tokenizer.texts_to_sequences(phrase_test)
 
     embedder = TextEmbedder(vocab_size=60, depth_emb=10)
     embedded = embedder(token)
