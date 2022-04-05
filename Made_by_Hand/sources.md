@@ -11,3 +11,6 @@
 Possiblement utile pour recoder transformer :
 - https://www.tensorflow.org/text/tutorials/transformer
 - https://github.com/valentingol/ : Code de Valentin qui m'a beaucoup aidé
+
+Papiers à voir :
+- Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, and Yann N. Dauphin. Convolutional sequence to sequence learning. arXiv preprint arXiv:1705.03122v2, 2017.
