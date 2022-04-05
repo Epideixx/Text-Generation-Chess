@@ -91,7 +91,7 @@ class MultiHeadAttention(tf.keras.Model):
                 mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
                 # set logits to -inf where mask=0 to ignore them
                 # during packpropagation
-                logits += (1.0 - mask) * -1e9
+                attention += (1.0 - mask) * -1e9
 
             attention_head = tf.nn.softmax(attention, axis=-1)
             # alignment has shape (batch, query_len, key_len)

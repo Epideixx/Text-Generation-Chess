@@ -21,13 +21,9 @@ Pour transformers.py :
     - Encoder + decoder + maybe vocab
 - Add Wandb DONE
 
-Pour Refactor :
-- Réaliser chaque partie du Transformer DONE
-- Réaliser la Pipeline qui prend en entrée le plateau et les précédents moves et retourne le coup à jouer PSEUDO DONE
-- POUR PROCHAINE FOIS : Il faut aussi fit le tokenizer du decoder sur les outputs ... au cas où il les ait jamais vu ... DONE BUT NOT PERFECT
-- Réaliser la sauvegarde du modèle
-- Réaliser l'entraînement du modèle
-- Se débrouiller pour que la taille du vocab soit automatique ...
-- Rajouter les couches de Dropout
-- Normaliser l'entrée DONE
-- Créer une fonction call(self, x : tf.Tensor) ==> DONE
+Pour DEV (05/04) :
+- Changer Accuracy pour avoir max 1
+- Taille vocab automatique ?
+- Utiliser mask pour contrecarrer padding dans Tokenizer
+- Couches Dropout
+- Training complet sur cluster

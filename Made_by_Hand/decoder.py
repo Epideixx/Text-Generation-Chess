@@ -52,7 +52,7 @@ class DecoderBlock(tf.keras.Model):
             self.model_size)
         self.ffn_norm = tf.keras.layers.BatchNormalization()
 
-    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None):
+    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, padding_mask_enc_dec: tf.Tensor = None):
         """
         Parameters
         ----------
@@ -76,7 +76,7 @@ class DecoderBlock(tf.keras.Model):
         Q_mha = add_norm_1
 
         mha_output, attention_block = self.masked_attention(
-            Q_mha, encoder_output, encoder_output, padding_mask)
+            Q_mha, encoder_output, encoder_output, padding_mask_enc_dec)
         add_2 = add_1 + mha_output  # Residual connection
         add_norm_2 = self.attention_norm(add_2)  # Normalization
 

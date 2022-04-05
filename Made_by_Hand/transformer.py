@@ -13,7 +13,7 @@ from embedding import TextEmbedder
 from positional_encoding import PositionalEncoding
 from encoder import Encoder
 from decoder import Decoder
-from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy
+from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy, ClassicAccuracy
 
 
 from import_data import import_data
@@ -65,8 +65,8 @@ class Transformer(tf.keras.Model):
         # For training ==> TO MAKE EVOLVE
         self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
-        self.accuracy = MaskedAccuracy()
-        self.loss = MaskedSparseCategoricalEntropy()
+        self.accuracy = ClassicAccuracy()
+        self.loss = tf.keras.losses.SparseCategoricalCrossentropy()
 
     def call(self, input):
         """
@@ -85,15 +85,23 @@ class Transformer(tf.keras.Model):
         emb_encoder = self.encoder_embedding(tok_encoder)
         pes_encoder = self.encoder_PE()
         in_encoder = emb_encoder + pes_encoder
+        mask_encoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
+            input_encoder, 0)), tf.float32), -1)
+        mask_encoder = tf.matmul(
+            mask_encoder, mask_encoder, transpose_b=True)  # To solve padding
         output_encoder, attention_encoder = self.encoder(
-            in_encoder, padding_mask=None)  # For the moment
+            in_encoder, padding_mask=mask_encoder)
 
         tok_decoder = input_decoder
         emb_decoder = self.decoder_embedding(tok_decoder)
         pes_decoder = self.decoder_PE()
         in_decoder = emb_decoder + pes_decoder
+        mask_decoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
+            input_decoder, 0)), tf.float32), -1)
+        mask_decoder = tf.matmul(
+            mask_decoder, mask_decoder, transpose_b=True)  # To solve padding
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
-            in_decoder, output_encoder, padding_mask=None)  # For the moment
+            in_decoder, output_encoder, padding_mask=mask_decoder)
 
         # Not sure about this part
         output = tf.keras.layers.Flatten()(output_decoder)

@@ -20,9 +20,39 @@ class MaskedSparseCategoricalEntropy(tf.keras.losses.Loss):
         loss = tf.cast(self.crossentropy(y_true, y_pred), tf.float32)
         loss *= mask
 
-        # From Valentin ???
+        # From Valentin
         loss = tf.reduce_sum(loss) / (tf.reduce_sum(mask) + 1e-8)
         return loss
+
+
+class ClassicAccuracy(object):
+    """ Computes the standard accuracy masked by the labels
+    equal to 0.
+    """
+
+    def __init__(self):
+        pass
+
+    def __call__(self, y_true: tf.Tensor, y_pred: tf.Tensor):
+        """Returns the accuracy value averaged over batch
+        and tokens.
+        Parameters
+        ----------
+        y_true : tf.Tensor, shape=(..., seq_len), dtype=int64
+            Labels, masked value are store as 0.
+        y_pred : float tf.Tensor, shape=(..., seq_len, vocab_size)
+            Prediction (probability or logits) for each token.
+        Returns
+        -------
+        acc : tf.Tensor, shape=(), dtype=float32
+            Result of the accuracy masked by the labels
+            equal to 0.
+        """
+        good_preds = tf.equal(y_true, tf.cast(
+            tf.argmax(y_pred, axis=-1), dtype=tf.int32))
+        good_preds = tf.cast(good_preds, tf.float32)
+        acc = tf.reduce_sum(good_preds) / good_preds.shape[0]
+        return acc
 
 
 # ------- Totally from VALENTIN --------
