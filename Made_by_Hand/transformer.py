@@ -165,13 +165,17 @@ class Transformer(tf.keras.Model):
                 if wandb_api:
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
-                if batch % 30 == 0:
-                    if not os.path.exists(os.path.join(os.path.dirname(__file__), "test_transfo")):
+                if batch % 2000 == 0:
+                    if not os.path.exists(os.path.join(os.path.dirname(__file__), "Transformer")):
                         os.makedirs(os.path.join(
-                            os.path.dirname(__file__), "test_transfo"))
+                            os.path.dirname(__file__), "Transformer"))
                     filename = os.path.join(os.path.dirname(__file__),
-                                            "test_transfo", "test_transfo")
+                                            "Transformer", "save_transfo")
                     self.save_weights(filename)
+
+            filename = os.path.join(os.path.dirname(
+                __file__), "Transformer", "save_transfo")
+            self.save_weights(filename)
 
 
 # Test

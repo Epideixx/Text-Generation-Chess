@@ -15,12 +15,12 @@ max_moves_in_game = 300
 vocab_moves = 64*(7*4 + 8)
 
 transfo = Transformer(vocab_moves=vocab_moves,
-                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4)
+                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=8)
 transfo2 = Transformer(vocab_moves=vocab_moves,
-                       length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4)
+                       length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=8)
 
 
-dataset = import_data(filename="test.txt")
+dataset = import_data(filename="fen.txt")
 dataset = list(zip(*dataset))
 
 encoder_tokenize = ChessTokenizer()
@@ -41,4 +41,4 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=True)
+transfo.fit(x=x, y=y, batch_size=128, num_epochs=30, wandb_api=True)
