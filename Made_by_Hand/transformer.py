@@ -1,9 +1,13 @@
-# Dependencies
+# ------------------------------------------------------
+#                   Transformer
+# ------------------------------------------------------
 
-from chess import Board
-import numpy as np
+from black import out
 import tensorflow as tf
+import numpy as np
+import wandb
 import os
+<<<<<<< HEAD
 from tqdm import tqdm
 import time
 import pickle
@@ -171,16 +175,23 @@ class Encoder(tf.keras.Model):
 
         if not os.path.exists(file):
             os.makedirs(file)
+=======
+>>>>>>> Refactor
 
-        self.save_weights(file)
+from tokenizer import ChessTokenizer
+from embedding import TextEmbedder
+from positional_encoding import PositionalEncoding
+from encoder import Encoder
+from decoder import Decoder
+from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy
 
-    def load(self, file="encoder"):
 
-        self.load_weights(file)
+from import_data import import_data
 
 
-# --------------------- DECODER ------------------------
+class Transformer(tf.keras.Model):
 
+<<<<<<< HEAD
 class Decoder(tf.keras.Model):
     def __init__(self, vocab_size, model_size, num_layers, h):
         """ Decoder architecture """
@@ -201,15 +212,48 @@ class Decoder(tf.keras.Model):
             model_size, h) for _ in range(num_layers)]
         self.attention_mid_norm = [
             tf.keras.layers.BatchNormalization() for _ in range(num_layers)]
+=======
+    def __init__(self, vocab_board=15, vocab_moves=2000, model_size=10, max_moves_in_game=300, length_board=127, num_layers=2, h=8):
+        """
+        Parameters
+        ----------
+        vocab_board : int, default = 15
+            Vocab size of the chess pieces
+        vocab_moves : int, default = 2000
+            Vocab size of possible moves
+        model_size : int, default = 10
+            Depth of the embedding model
+        max_moves_in_game : int, default = 300
+            Max number of moves in a game
+        length_board : int, default = 127
+            Size of the encoding of the board
+        num_layers : int, default = 2
+            Number of encoders et of decoders
+        h : int, default = 10
+            Number of heads in the Multi Head Attention method
+>>>>>>> Refactor
 
-        self.dense_1 = [tf.keras.layers.Dense(
-            model_size * 4, activation='sigmoid') for _ in range(num_layers)]
-        self.dense_2 = [tf.keras.layers.Dense(
-            model_size, activation='sigmoid') for _ in range(num_layers)]
-        self.ffn_norm = [tf.keras.layers.BatchNormalization()
-                         for _ in range(num_layers)]
+        """
+        super(Transformer, self).__init__()
+        self.max_moves_in_game = max_moves_in_game
+        self.length_board = length_board
+
+        self.encoder_embedding = TextEmbedder(
+            vocab_size=vocab_board, depth_emb=model_size)
+        self.encoder_PE = PositionalEncoding(
+            seq_length=length_board, depth=model_size)
+        self.encoder = Encoder(
+            vocab_size=vocab_board, model_size=model_size, h=h, num_encoder=num_layers)
+
+        self.decoder_embedding = TextEmbedder(
+            vocab_size=vocab_moves, depth_emb=model_size)
+        self.decoder_PE = PositionalEncoding(
+            seq_length=max_moves_in_game, depth=model_size)
+        self.decoder = Decoder(
+            vocab_size=vocab_moves, model_size=model_size, h=h, num_decoder=num_layers)
 
         # Final layer to associate the data to one word
+<<<<<<< HEAD
         self.dense = tf.keras.layers.Dense(vocab_size, activation="softmax")
 
     def call(self, sequence, encoder_output, padding_mask=None):
@@ -268,18 +312,48 @@ class Decoder(tf.keras.Model):
 
         self.load_weights(file)
 
+=======
+        self.final = tf.keras.layers.Dense(vocab_moves, activation="softmax")
+>>>>>>> Refactor
 
-class Transformer():
+        # For training ==> TO MAKE EVOLVE
+        self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
+                                                  epsilon=1e-9)
+        self.accuracy = MaskedAccuracy()
+        self.loss = MaskedSparseCategoricalEntropy()
 
-    def __init__(self, vocab_board=34, vocab_moves=4034, model_size=MODEL_SIZE, max_moves_in_game=500, num_layers=1, h=1):
+    def call(self, input):
         """
-        vocab_bard = 34 because 2*16 pieces + empty + security
-        vocab_moves = 4034 because 64*63 possible moves + <start> + <end>
-        max_moves_in_game = 500 because we will not treat the case of very long games for the moment
-        """
-        self.encoder = Encoder(vocab_board, model_size, num_layers, h)
-        self.decoder = Decoder(vocab_moves, model_size, num_layers, h)
+        Parameters
+        ----------
+        input :  (tf.Tensor, tf.Tensor)
+            (Tokenized input of the encoder, Tokenized input of the decoder
 
+        Returns
+        -------
+        output : tf.Tensor
+            TO COMPLETE
+        """
+        input_encoder, input_decoder = input
+        tok_encoder = input_encoder
+        emb_encoder = self.encoder_embedding(tok_encoder)
+        pes_encoder = self.encoder_PE()
+        in_encoder = emb_encoder + pes_encoder
+        output_encoder, attention_encoder = self.encoder(
+            in_encoder, padding_mask=None)  # For the moment
+
+        tok_decoder = input_decoder
+        emb_decoder = self.decoder_embedding(tok_decoder)
+        pes_decoder = self.decoder_PE()
+        in_decoder = emb_decoder + pes_decoder
+        output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
+            in_decoder, output_encoder, padding_mask=None)  # For the moment
+
+        # Not sure about this part
+        output = tf.keras.layers.Flatten()(output_decoder)
+        output = self.final(output)
+
+<<<<<<< HEAD
         self.max_moves_in_game = max_moves_in_game
 
         self.crossentropy = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -326,108 +400,121 @@ class Transformer():
         dataset = tf.data.Dataset.from_tensor_slices(
             (boards, moves_to_play, mem_moves))
         dataset = dataset.shuffle(20).batch(batchsize)
+=======
+        return output
+>>>>>>> Refactor
 
-        return dataset
+    def predict(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
+        """
+        Parameters
+        ----------
+        input_encoder : tf.Tensor
+            Tokenized input of the encoder
+        input_decoder : tf.Tensor
+            Tokenized input of the decdoder
 
-    def loss_func(self, targets, logits):
+        Returns
+        -------
+        output : tf.Tensor
+            TO COMPLETE
+        """
+        input = input_encoder, input_decoder
+        output = self(input=input)
+        output = tf.argmax(output, axis=-1)
 
-        mask = tf.math.logical_not(tf.math.equal(targets, 0))
-        mask = tf.cast(mask, dtype=tf.int64)
-        loss = self.crossentropy(targets, logits, sample_weight=mask)
+        output = [output.numpy()[i][0] for i in range(output.shape[0])]
 
-        return loss
-
-    def train_step(self, source_seq, target_seq_in, target_seq_out):
-        with tf.GradientTape() as tape:
-
-            encoder_output = self.encoder(source_seq)
-
-            mask = 1 - tf.cast(tf.equal(target_seq_in, 0), dtype=tf.float32)
-            mask = tf.expand_dims(mask, axis=1)
-            mask = tf.matmul(mask, mask, transpose_a=True)
-
-            decoder_output = self.decoder(target_seq_in, encoder_output, mask)
-
-            loss = self.loss_func(target_seq_out, decoder_output)
-
-        variables = self.encoder.trainable_variables + self.decoder.trainable_variables
-        gradients = tape.gradient(loss, variables)
-        # print(gradients)
-        self.optimizer.apply_gradients(zip(gradients, variables))
-
-        return loss
-
-    def predict(self, board_to_predict, mem_moves):
-
-        board = self.tokenizer_boards.texts_to_sequences([board_to_predict])
-        encoder_output = self.encoder(tf.constant(board))
-        decoder_input = tf.constant(
-            list(self.tokenizer_moves.texts_to_sequences([mem_moves])), dtype=tf.int64)
-
-        decoder_input = tf.keras.preprocessing.sequence.pad_sequences(
-            decoder_input, padding='post', maxlen=self.max_moves_in_game)
-
-        mask = 1 - tf.cast(tf.equal(decoder_input, 0), dtype=tf.float32)
-        mask = tf.expand_dims(mask, axis=1)
-        mask = tf.matmul(mask, mask, transpose_a=True)
-
-        decoder_output = self.decoder(decoder_input, encoder_output, mask)
-
-        output = tf.expand_dims(tf.argmax(decoder_output, -1)[:, -1], axis=1)
-
-        try:
-            output = self.tokenizer_moves.index_word[output.numpy()[0][0]]
-        except KeyError:
-            output = None
         return output
 
-    def train(self, file_data, epochs=10):
+    def train_step(self, encoder_inputs, transfo_real_outputs, decoder_inputs):
 
-        dataset = self.import_data(file_data)
+        with tf.GradientTape() as tape:
 
-        for e in range(epochs):
-            for batch, (boards, encoded_move_to_play, encoded_mem_moves) in enumerate(dataset.take(-1)):
+            input = encoder_inputs, decoder_inputs
+            transfo_predict_outputs = self(input=input)
+            loss = self.loss(transfo_real_outputs,
+                             transfo_predict_outputs)
 
-                loss = self.train_step(boards, encoded_mem_moves,
-                                       encoded_move_to_play)
+        gradients = tape.gradient(loss, self.trainable_variables)
+        self.optimizer.apply_gradients(
+            zip(gradients, self.trainable_variables))
+        accuracy = self.accuracy(
+            transfo_real_outputs, transfo_predict_outputs)
 
-            print('Epoch {} Loss {:.4f}'.format(e + 1, loss.numpy()))
+        return loss, accuracy
 
-    def save(self, folder="transformer"):
+    def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, wandb_api=True):
 
-        folder = os.path.join(os.path.dirname(__file__), folder)
+        if wandb_api:
+            wandb.init(project="Chess-Transformer", entity="epideixx")
 
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+        dataset = tf.data.Dataset.zip((x, y))
+        dataset = dataset.shuffle(32000).batch(batch_size=batch_size)
 
-        encoder = os.path.join(folder, "encoder")
-        self.encoder.save(file=encoder)
+        for _ in range(num_epochs):
 
-        decoder = os.path.join(folder, "decoder")
-        self.decoder.save(file=decoder)
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(dataset):
 
-        # other_parameters = os.path.join(folder, "optimizer")
-        # tf.saved_model.save(
-        #     self.optimizer, export_dir=other_parameters)
+                loss, accuracy = self.train_step(
+                    encoder_inputs, transfo_real_outputs, decoder_inputs)
+                if wandb_api:
+                    wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
-    def load(self, folder="transformer"):
-
-        encoder = os.path.join(folder, "encoder")
-        self.encoder.load(encoder)
-
-        decoder = os.path.join(folder, "decoder")
-        self.decoder.load(decoder)
-
-        # other_parameters = os.path.join(folder, "optimizer")
-        # self.optimizer = tf.saved_model.load(
-        #     other_parameters)
+                if batch % 30 == 0:
+                    if not os.path.exists(os.path.join(os.path.dirname(__file__), "test_transfo")):
+                        os.makedirs(os.path.join(
+                            os.path.dirname(__file__), "test_transfo"))
+                    filename = os.path.join(os.path.dirname(__file__),
+                                            "test_transfo", "test_transfo")
+                    self.save_weights(filename)
 
 
+# Test
 if __name__ == '__main__':
-    transformer = Transformer()
 
-    encoder = transformer.encoder
-    encoder.save_weights("test_encoder_weights")
-    encoder.load_weights("test_encoder_weights")
+    # ---- Test 1 ----
+    """
+    transfo = Transformer(vocab_moves=570)
+
+    dataset = import_data(filename="test.txt")
+    boards, move_to_play, moves_mem = zip(*dataset)
+
+    output = transfo.predict(boards[0:45], moves_mem[0:45])
+    print("Le transformateur prédit : ", output)
+
+    print('ok')
+    """
+
+    # Vérifier les shapes ... ==> En gros faut juste se démerder pour flatten ou un truc comme ça
+    # Penser à supprimer les print dans le code
+
+    # ---- Test 2 ----
+    length_board = 64
+    max_moves_in_game = 300
+    vocab_moves = 64*(7*4 + 8)
+
+    transfo = Transformer(vocab_moves=vocab_moves,
+                          length_board=length_board, num_layers=4)
+
+    dataset = import_data(filename="test.txt")
+
+    data = dataset[:45]
+    enc_input = [x[0] for x in dataset[:45]]
+    dec_input = [x[2] for x in dataset[:45]]
+
+    encoder_tokenize = ChessTokenizer()
+    decoder_tokenize = ChessTokenizer()
+
+    encoder_tokenize.fit_on_texts(enc_input)
+    decoder_tokenize.fit_on_texts(dec_input)
+
+    enc_input = encoder_tokenize.texts_to_sequences(
+        enc_input, maxlen=length_board)
+    dec_input = decoder_tokenize.texts_to_sequences(
+        dec_input, maxlen=max_moves_in_game)
+
+    output_decoder = transfo.call((enc_input, dec_input))
+
+    transfo.build(input_shape=[enc_input.shape, dec_input.shape])  # Chelou ...
 
     print("ok")

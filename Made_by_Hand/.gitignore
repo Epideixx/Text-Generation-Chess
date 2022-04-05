@@ -1,12 +1,15 @@
 test.txt
 checkpoint
 __pycache__
-./wandb
+wandb
 
 # Because too large files 
-./pgn
+/pgn
 fen.txt
 /transformer
+
+# Other reasons
+/test_transfo
 
 # Except
 !./pgn/Adams.pgn
