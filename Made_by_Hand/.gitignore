@@ -8,5 +8,8 @@ wandb
 fen.txt
 /transformer
 
+# Other reasons
+/test_transfo
+
 # Except
 !./pgn/Adams.pgn
