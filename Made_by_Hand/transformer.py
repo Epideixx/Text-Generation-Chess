@@ -6,6 +6,7 @@ from black import out
 import tensorflow as tf
 import numpy as np
 import wandb
+import os
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -156,9 +157,13 @@ class Transformer(tf.keras.Model):
                 if wandb_api:
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
-                # Pour test :
-                if batch == 0:
-                    break
+                if batch % 30 == 0:
+                    if not os.path.exists(os.path.join(os.path.dirname(__file__), "test_transfo")):
+                        os.makedirs(os.path.join(
+                            os.path.dirname(__file__), "test_transfo"))
+                    filename = os.path.join(os.path.dirname(__file__),
+                                            "test_transfo", "test_transfo")
+                    self.save_weights(filename)
 
 
 # Test
@@ -206,10 +211,7 @@ if __name__ == '__main__':
         dec_input, maxlen=max_moves_in_game)
 
     output_decoder = transfo.call((enc_input, dec_input))
-    print(output_decoder)
 
     transfo.build(input_shape=[enc_input.shape, dec_input.shape])  # Chelou ...
-    # print(transfo.summary())
-    print(transfo.summary())
 
     print("ok")

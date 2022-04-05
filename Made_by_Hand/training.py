@@ -9,8 +9,7 @@ from tokenizer import ChessTokenizer
 import numpy as np
 import os
 
-# To delete
-test = True
+
 length_board = 64
 max_moves_in_game = 300
 vocab_moves = 64*(7*4 + 8)
@@ -42,39 +41,4 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-print("ok 1")
-
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=False)
-if test:
-    layer = transfo.encoder.encoder_block[0].dense_1
-    weights = layer.get_weights()
-
-trainable_var = transfo.trainable_variables
-print(len(trainable_var))
-
-if not os.path.exists(os.path.join(os.path.dirname(__file__), "test_transfo")):
-    os.makedirs(os.path.join(os.path.dirname(__file__), "test_transfo"))
-filename = os.path.join(os.path.dirname(__file__),
-                        "test_transfo", "test_transfo")
-transfo.save_weights(filename)
-transfo2.load_weights(filename)
-transfo2.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=False)
-print("ok 2")
-
-if test:
-    weights = [w - transfo2.encoder.encoder_block[0].dense_1.get_weights()[i]
-               for i, w in enumerate(weights)]
-    print(weights)
-
-x_input_for_shape = [tok_encoder.shape, tok_decoder.shape]
-
-print("Input shape : ", x_input_for_shape)
-# transfo.call((tok_encoder[0:30], tok_decoder[0:30]))
-
-transfo.build(input_shape=x_input_for_shape)
-
-print(transfo2.summary())
-
-transfo2.save_weights(filename)
-
-print("ok")
+transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=True)
