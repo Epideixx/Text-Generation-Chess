@@ -16,7 +16,7 @@ from import_data import import_data
 
 class DecoderBlock(tf.keras.Model):
 
-    def __init__(self, vocab_size: int, model_size: int, h: int = 8):
+    def __init__(self, vocab_size: int, model_size: int, h: int = 8, dropout: float = 0.0):
         """ 
         Architecture of the Decoder block
 
@@ -28,12 +28,15 @@ class DecoderBlock(tf.keras.Model):
             Depth of the embedding, e.g size of each vector representing a token
         h : int, default = 8
             Number of heads
+        dropout : float, default = 0.0
+            Rate of dropout
         """
 
         super(DecoderBlock, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
         self.h = h
+        self.dropout = dropout
 
         self.input_norm = tf.keras.layers.LayerNormalization(epsilon=1e-6)
 
@@ -50,9 +53,10 @@ class DecoderBlock(tf.keras.Model):
             self.model_size * 4, activation='relu')
         self.dense_2 = tf.keras.layers.Dense(
             self.model_size)
+        self.dropoutlayer = tf.keras.layers.Dropout(rate=dropout)
         self.ffn_norm = tf.keras.layers.BatchNormalization()
 
-    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, padding_mask_enc_dec: tf.Tensor = None):
+    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, padding_mask_enc_dec: tf.Tensor = None, training: bool = False):
         """
         Parameters
         ----------
@@ -70,6 +74,8 @@ class DecoderBlock(tf.keras.Model):
         input_norm = self.input_norm(input)
         masked_mha_output, masked_attention_block = self.attention(
             input_norm, input_norm, input_norm, padding_mask)
+        masked_mha_output = self.dropoutlayer(
+            masked_mha_output, training=training)
         add_1 = input + masked_mha_output  # Residual connection
         add_norm_1 = self.attention_norm(add_1)  # Normalization
 
@@ -77,13 +83,15 @@ class DecoderBlock(tf.keras.Model):
 
         mha_output, attention_block = self.masked_attention(
             Q_mha, encoder_output, encoder_output, padding_mask_enc_dec)
+        mha_output = self.dropoutlayer(mha_output, training=training)
         add_2 = add_1 + mha_output  # Residual connection
         add_norm_2 = self.attention_norm(add_2)  # Normalization
 
         ffn_in = add_norm_2
-
         ffn_out = self.dense_1(ffn_in)
+        ffn_out = self.dropoutlayer(ffn_out, training=training)
         ffn_out = self.dense_2(ffn_out)
+        ffn_out = self.dropoutlayer(ffn_out, training=training)
         ffn_out = ffn_in + ffn_out
         ffn_out = self.ffn_norm(ffn_out)
 
@@ -94,7 +102,7 @@ class DecoderBlock(tf.keras.Model):
 
 class Decoder(tf.keras.Model):
 
-    def __init__(self, vocab_size: int, model_size: int, h: int = 8, num_decoder: int = 2):
+    def __init__(self, vocab_size: int, model_size: int, h: int = 8, num_decoder: int = 2, dropout: float = 0.0):
         """ 
         Architecture of the Decoder
 
@@ -108,17 +116,20 @@ class Decoder(tf.keras.Model):
             Number of heads
         num_encoder : int, default = 2
             Number of decoders
+        dropout : float, default = 0.0
+            Rate of dropout
         """
         super(Decoder, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
         self.h = h
         self.num_decoder = num_decoder
+        self.dropout = dropout
 
         self.decoder_blocks = [DecoderBlock(
             vocab_size, model_size, h) for _ in range(num_decoder)]
 
-    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None):
+    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, training: bool = False):
         """
         Pass throught the Decoder
 
@@ -141,7 +152,7 @@ class Decoder(tf.keras.Model):
 
         for i in range(self.num_decoder):
             output, masked_attention, attention = self.decoder_blocks[i](
-                output, encoder_output, padding_mask)
+                output, encoder_output, padding_mask, training=training)
             masked_attentions.append(masked_attention)
             attentions.append(attention)
 

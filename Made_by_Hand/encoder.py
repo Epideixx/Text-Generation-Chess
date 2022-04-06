@@ -15,7 +15,7 @@ from import_data import import_data
 
 class EncoderBlock(tf.keras.Model):
 
-    def __init__(self, vocab_size: int, model_size: int, h: int = 8):
+    def __init__(self, vocab_size: int, model_size: int, h: int = 8, dropout: float = 0.0):
         """ 
         Architecture of the Encoder block
 
@@ -27,12 +27,15 @@ class EncoderBlock(tf.keras.Model):
             Depth of the embedding, e.g size of each vector representing a token
         h : int, default = 8
             Number of heads
+        dropout : float, default = 0.0
+            Rate of dropout
         """
 
         super(EncoderBlock, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
         self.h = h
+        self.dropout = dropout
 
         self.input_norm = tf.keras.layers.LayerNormalization(epsilon=1e-6)
 
@@ -45,30 +48,35 @@ class EncoderBlock(tf.keras.Model):
             self.model_size * 4, activation='relu')
         self.dense_2 = tf.keras.layers.Dense(
             self.model_size)
+        self.dropoutlayer = tf.keras.layers.Dropout(rate=dropout)
         self.ffn_norm = tf.keras.layers.BatchNormalization()
 
-    def call(self, input: tf.Tensor, padding_mask: tf.Tensor = None):
+    def call(self, input: tf.Tensor, padding_mask: tf.Tensor = None, training: bool = False):
         """
         Parameters
         ----------
         input : tf.Tensor, shape = (..., vocab_size, model_size)
             Input of the Encoder block, from another block or the Embedding layer
         padding_mask : None or tf.Tensor, shape = ()
-            TO COMPLETE
+            Mask to apply on the input to avoid considering some part of it
 
         Returns
         -------
+        TO COMPLETE
         """
         input_norm = self.input_norm(input)
         mha_output, attention_block = self.attention(
             input_norm, input_norm, input_norm, padding_mask)
+        mha_output = self.dropoutlayer(mha_output, training=training)
         add_1 = input + mha_output  # Residual connection
         add_norm_1 = self.attention_norm(add_1)  # Normalization
 
         ffn_in = add_norm_1
 
         ffn_out = self.dense_1(ffn_in)
+        ffn_out = self.dropoutlayer(ffn_out, training=training)
         ffn_out = self.dense_2(ffn_out)
+        ffn_out = self.dropoutlayer(ffn_out, training=training)
         ffn_out = add_1 + ffn_out
         ffn_out = self.ffn_norm(ffn_out)
 
@@ -79,7 +87,7 @@ class EncoderBlock(tf.keras.Model):
 
 class Encoder(tf.keras.Model):
 
-    def __init__(self, vocab_size: int, model_size: int, h: int = 8, num_encoder: int = 2):
+    def __init__(self, vocab_size: int, model_size: int, h: int = 8, num_encoder: int = 2, dropout: float = 0.0):
         """ 
         Architecture of the Encoder block
 
@@ -93,17 +101,20 @@ class Encoder(tf.keras.Model):
             Number of heads
         num_encoder : int, default = 2
             Number of encoders
+        dropout : float, default = 0.0
+            Rate of dropout
         """
         super(Encoder, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
         self.h = h
         self.num_encoder = num_encoder
+        self.dropout = dropout
 
         self.encoder_block = [EncoderBlock(
-            vocab_size, model_size, h) for _ in range(num_encoder)]
+            vocab_size, model_size, h, dropout) for _ in range(num_encoder)]
 
-    def call(self, input: tf.Tensor, padding_mask: tf.Tensor = None):
+    def call(self, input: tf.Tensor, padding_mask: tf.Tensor = None, training: bool = False):
         """
         Pass throught the Encoder
 
@@ -116,13 +127,15 @@ class Encoder(tf.keras.Model):
 
         Returns
         -------
+        TO COMPLETE
         """
 
         output = input
         attentions = []
 
         for i in range(self.num_encoder):
-            output, attention = self.encoder_block[i](output, padding_mask)
+            output, attention = self.encoder_block[i](
+                output, padding_mask, training)
             attentions.append(attention)
 
         attention = tf.concat(attentions, axis=-1)
