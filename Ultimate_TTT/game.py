@@ -267,6 +267,44 @@ class TTT(Game):
             print(line)
         print("---")
 
+    def rep_board(self):
+
+        board = ""
+
+        for i in range(9):
+            line = ""
+            for j in range(9):
+                if j % 3 == 0:
+                    line += "|"
+                if self.board[i, j, 0] == 1:
+                    line += "x"
+                elif self.board[i, j, 1] == 1:
+                    line += "o"
+                else:
+                    line += "."
+            board += line
+            board += "||"
+
+        board += "||||"
+
+        for i in range(3):
+            line = ""
+            for j in range(3):
+                if self.upperBoard[i, j, 0] == 1:
+                    line += "x"
+                elif self.upperBoard[i, j, 1] == 1:
+                    line += "o"
+                else:
+                    line += "."
+            board += line
+
+        return board
+
+    def rep_move(self, move):
+        letters = {i: let for i, let in enumerate("ABCDEFGHI")}
+
+        return letters[move[0]] + str(move[1])
+
 
 if __name__ == '__main__':
     ttt = TTT()

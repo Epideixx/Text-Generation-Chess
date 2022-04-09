@@ -165,14 +165,15 @@ if __name__ == '__main__':
             ttt.show()
 
     if test_2:
+        mcts = MCTS(cpuct=0.1)
         for _ in range(10):
             player = 0
             n_simu = 60
-            mcts = MCTS(cpuct=0.1)
             ttt = TTT()
+            mcts2 = MCTS(cpuct=0.1)
             while not(ttt.game_over):
 
-                if player == 0:
+                if player == 1:
                     # Simulations
                     for _ in range(n_simu):
                         mcts.search(ttt)
@@ -181,7 +182,15 @@ if __name__ == '__main__':
                     best_move = list(mcts.getActionProb(ttt, temp=0).keys())[0]
                     ttt.push(best_move)
                 else:
-                    ttt.playRandomMove()
+                    # Simulations
+                    for _ in range(n_simu):
+                        mcts2.search(ttt)
+
+                    # Play the best move
+                    best_move = list(
+                        mcts2.getActionProb(ttt, temp=0).keys())[0]
+                    ttt.push(best_move)
+
                 ttt = ttt.mirror()
                 player = 1 - player
             ttt.show()
