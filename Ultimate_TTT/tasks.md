@@ -8,3 +8,4 @@ TO DO:
 NOTES :
 - Ben en fait, faut peut-être lui dire pour qui il joue le coco, parce que du coup il sait pas qui il fait gagner ...
 D'ailleurs, ici, on est toujours X normalement ! (grâce à la façon dont le jeu est encodé)
+- Changer Transformer pour vocab board parce que pas d'espace entre les lettres du plateau
