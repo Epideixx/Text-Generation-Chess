@@ -101,16 +101,6 @@ def save_games(nb_games, nb_simu=100, filename="fen.txt", rate_mcts_vs_mcts=1, r
 
     fen_file = os.path.join(os.path.dirname(__file__), filename)
 
-    # Importing already existing data
-    if os.path.exists(fen_file):
-        with open(fen_file) as f:
-            for line in tqdm(f, desc="read fen.txt", unit=" moves", mininterval=1):
-                if line:
-                    set_to_add.add(line)
-                    nb_games -= 1
-                    if nb_games <= 0:
-                        break
-
     # Import the new data
     for _ in tqdm(range(nb_games), desc="Generate games", unit=" games", mininterval=1):
         game = play_one_game(nb_simu=nb_simu)

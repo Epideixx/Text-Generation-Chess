@@ -146,17 +146,21 @@ class MCTS():
 
 if __name__ == '__main__':
 
-    test_1 = False
+    test_1 = True
     test_2 = True
 
     if test_1:
-        n_simu = 60
+        n_simu = 100
         mcts = MCTS(cpuct=0.1)
         ttt = TTT()
         while not(ttt.game_over):
             # Simulations
+
+            t0 = time.time()
             for _ in range(n_simu):
                 mcts.search(ttt)
+
+            print("Time for 100 simu : ", str(time.time() - t0))
 
             # Play the best move
             best_move = list(mcts.getActionProb(ttt, temp=0).keys())[0]
