@@ -149,7 +149,7 @@ class Transformer(tf.keras.Model):
 
         return loss, accuracy
 
-    def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, wandb_api=True):
+    def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, wandb_api=True, file_to_save = None):
 
         if wandb_api:
             wandb.init(project="Chess-Transformer", entity="epideixx")
@@ -166,13 +166,14 @@ class Transformer(tf.keras.Model):
                 if wandb_api:
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
-                if batch % 30 == 0:
-                    if not os.path.exists(os.path.join(os.path.dirname(__file__), "test_transfo")):
-                        os.makedirs(os.path.join(
-                            os.path.dirname(__file__), "test_transfo"))
-                    filename = os.path.join(os.path.dirname(__file__),
-                                            "test_transfo", "test_transfo")
-                    self.save_weights(filename)
+                if file_to_save :
+                    if batch % 20 == 0: # To edit
+                        if not os.path.exists(os.path.join(os.path.dirname(__file__), file_to_save)):
+                            os.makedirs(os.path.join(
+                                os.path.dirname(__file__), file_to_save))
+                        filename = os.path.join(os.path.dirname(__file__),
+                                                file_to_save, file_to_save)
+                        self.save_weights(filename)
 
 
 # Test

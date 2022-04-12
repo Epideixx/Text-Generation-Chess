@@ -5,7 +5,6 @@
 
 # importing sys
 import sys
-from cv2 import split
   
 # adding Folder_2 to the system path
 sys.path.insert(1, 'C:/Users/jonat/OneDrive/Documents/CentraleSupelec/2A/Echecs2A/Text-Generation-Chess/Made_by_Hand')
@@ -53,4 +52,5 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=2, num_epochs=5, wandb_api=True)
+transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=False, file_to_save = None)
+print(transfo.summary())
