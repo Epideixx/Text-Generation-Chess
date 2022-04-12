@@ -5,6 +5,7 @@
 
 # importing sys
 import sys
+from cv2 import split
   
 # adding Folder_2 to the system path
 sys.path.insert(1, 'C:/Users/jonat/OneDrive/Documents/CentraleSupelec/2A/Echecs2A/Text-Generation-Chess/Made_by_Hand')
@@ -33,7 +34,7 @@ filename = os.path.join(os.path.dirname(__file__), "fen.txt")
 dataset = import_data(filename=filename)
 dataset = list(zip(*dataset))
 
-encoder_tokenize = TTTTokenizer()
+encoder_tokenize = TTTTokenizer(char_level = True)
 decoder_tokenize = TTTTokenizer()
 
 encoder_tokenize.fit_on_texts(list(dataset[0]))
@@ -52,4 +53,4 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=False)
+transfo.fit(x=x, y=y, batch_size=2, num_epochs=5, wandb_api=True)

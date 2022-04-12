@@ -6,11 +6,11 @@ import tensorflow as tf
 
 class ChessTokenizer(tf.keras.preprocessing.text.Tokenizer):
 
-    def __init__(self):
+    def __init__(self, char_level = False):
 
         super(ChessTokenizer, self).__init__()
         self.tokenizer = tf.keras.preprocessing.text.Tokenizer(
-            filters='', lower=False)
+            filters='', lower=False, char_level = char_level)
 
     def fit_on_texts(self, texts):
         """
