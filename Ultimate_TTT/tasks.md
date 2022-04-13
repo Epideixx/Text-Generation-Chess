@@ -4,7 +4,7 @@ TO DO:
 - Créer un générateur de données DONE
 - Entraîner le Transformer custom pour TTT DONE
 
-- Générer plus de données plus rapidement
+- Générer plus de données plus rapidement ==> IDEE : MCTS avec une part d'aléatoire variable
 - Faire un train_test_split
 - Faire un entraînement massif
 - Pouvoir jouer contre lui

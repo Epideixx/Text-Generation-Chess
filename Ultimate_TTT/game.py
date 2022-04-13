@@ -206,6 +206,7 @@ class TTT(Game):
         p = np.random.choice(np.flatnonzero(
             self.legal_moves == self.legal_moves.max()))
         self.push((p//9, p % 9))
+        return (p//9, p % 9)
 
     def get_symmetries(self, pi):
         """

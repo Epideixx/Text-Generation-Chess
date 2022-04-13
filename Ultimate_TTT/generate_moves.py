@@ -4,6 +4,7 @@
 
 import os
 from tqdm import tqdm
+import numpy as np
 
 from MCTS import MCTS
 from game import TTT
@@ -11,7 +12,7 @@ from game import TTT
 cpuct = 0.1
 
 
-def play_one_game(nb_simu, player1="mcts", player2="mcts"):
+def play_one_game(nb_simu, player1="mcts", player2="mcts", random_rate = 0.1):
     """
     Returns
     -------
@@ -49,13 +50,17 @@ def play_one_game(nb_simu, player1="mcts", player2="mcts"):
     while not(ttt.game_over):
 
         if player == 0:
-            # Simulations
-            for _ in range(nb_simu):
-                player1.search(ttt)
+            if random_rate <= np.random.uniform():
+                best_move = ttt.playRandomMove()
+            
+            else : 
+                # Simulations
+                for _ in range(nb_simu):
+                    player1.search(ttt)
 
-            # Play the best move
-            best_move = list(player1.getActionProb(ttt, temp=0).keys())[0]
-            ttt.push(best_move)
+                # Play the best move
+                best_move = list(player1.getActionProb(ttt, temp=0).keys())[0]
+                ttt.push(best_move)
 
             # Mem
             game_mem_1.append(
@@ -63,14 +68,17 @@ def play_one_game(nb_simu, player1="mcts", player2="mcts"):
             mem_moves.append(ttt.rep_move(best_move))
 
         else:
-            # Simulations
-            for _ in range(nb_simu):
-                player2.search(ttt)
+            if random_rate <= np.random.uniform():
+                best_move = ttt.playRandomMove()
+            
+            else : 
+                # Simulations
+                for _ in range(nb_simu):
+                    player2.search(ttt)
 
-            # Play the best move
-            best_move = list(
-                player2.getActionProb(ttt, temp=0).keys())[0]
-            ttt.push(best_move)
+                # Play the best move
+                best_move = list(player2.getActionProb(ttt, temp=0).keys())[0]
+                ttt.push(best_move)
 
             # Mem
             game_mem_2.append(
@@ -91,7 +99,7 @@ def play_one_game(nb_simu, player1="mcts", player2="mcts"):
         return None
 
 
-def save_games(nb_games, nb_simu=100, filename="fen.txt", rate_mcts_vs_mcts=1, rate_mcts_vs_rnd=0, rate_rnd_vs_rnd=0):
+def save_games(nb_games, nb_simu=100, filename="fen.txt", random_rate = 0.1):
     """
     Save in the chosen file evrey moves played by the winner in multiple games.
     """
@@ -103,7 +111,7 @@ def save_games(nb_games, nb_simu=100, filename="fen.txt", rate_mcts_vs_mcts=1, r
 
     # Import the new data
     for _ in tqdm(range(nb_games), desc="Generate games", unit=" games", mininterval=1):
-        game = play_one_game(nb_simu=nb_simu)
+        game = play_one_game(nb_simu=nb_simu, random_rate= random_rate)
         if game:
             for (board, move, mem_moves) in game:
                 line = board + ' - ' + move + ' - ' + mem_moves
@@ -122,4 +130,4 @@ if __name__ == '__main__':
     res = play_one_game(nb_simu=60, player1="mcts", player2="mcts")
     print(res)
 
-    save_games(nb_games=10, nb_simu=50)
+    save_games(nb_games=5, nb_simu=50, random_rate=0.5, filename="test.txt")
