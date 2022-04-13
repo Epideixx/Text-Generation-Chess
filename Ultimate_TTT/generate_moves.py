@@ -50,7 +50,7 @@ def play_one_game(nb_simu, player1="mcts", player2="mcts", random_rate = 0.1):
     while not(ttt.game_over):
 
         if player == 0:
-            if random_rate <= np.random.uniform():
+            if random_rate >= np.random.uniform():
                 best_move = ttt.playRandomMove()
             
             else : 
@@ -68,7 +68,7 @@ def play_one_game(nb_simu, player1="mcts", player2="mcts", random_rate = 0.1):
             mem_moves.append(ttt.rep_move(best_move))
 
         else:
-            if random_rate <= np.random.uniform():
+            if random_rate >= np.random.uniform():
                 best_move = ttt.playRandomMove()
             
             else : 
@@ -130,4 +130,4 @@ if __name__ == '__main__':
     res = play_one_game(nb_simu=60, player1="mcts", player2="mcts")
     print(res)
 
-    save_games(nb_games=2, nb_simu=50, random_rate=0.5, filename="test.txt")
+    save_games(nb_games=2, nb_simu=50, random_rate=0.2, filename="test.txt")
