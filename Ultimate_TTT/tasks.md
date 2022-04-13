@@ -5,6 +5,7 @@ TO DO:
 - Entraîner le Transformer custom pour TTT DONE
 
 - Générer plus de données plus rapidement ==> IDEE : MCTS avec une part d'aléatoire variable
+- En fait, à chaque fois qu'on regénère des données, il supprimait les anciennes ...
 - Faire un train_test_split
 - Faire un entraînement massif
 - Pouvoir jouer contre lui

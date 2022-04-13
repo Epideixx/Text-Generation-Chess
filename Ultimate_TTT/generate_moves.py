@@ -120,7 +120,7 @@ def save_games(nb_games, nb_simu=100, filename="fen.txt", random_rate = 0.1):
             games += 1
 
     # And we write the data in fen.txt
-    with open(fen_file, "w") as f:
+    with open(fen_file, "a") as f:
         for line in tqdm(set_to_add, desc="write fen.txt", unit=" moves", mininterval=1):
             f.write(line + "\n")
     print("Imported : ", games, " games")
@@ -130,4 +130,4 @@ if __name__ == '__main__':
     res = play_one_game(nb_simu=60, player1="mcts", player2="mcts")
     print(res)
 
-    save_games(nb_games=5, nb_simu=50, random_rate=0.5, filename="test.txt")
+    save_games(nb_games=2, nb_simu=50, random_rate=0.5, filename="test.txt")
