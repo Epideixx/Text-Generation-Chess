@@ -2,7 +2,7 @@
 #                   Transformer
 # ------------------------------------------------------
 
-from black import out
+from base64 import decode
 import tensorflow as tf
 import numpy as np
 import wandb
@@ -67,7 +67,7 @@ class Transformer(tf.keras.Model):
         self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
         self.accuracy = ClassicAccuracy()
-        self.loss = tf.keras.losses.SparseCategoricalCrossentropy()
+        self.loss = MaskedSparseCategoricalEntropy()
 
     def call(self, input, training: bool = False):
         """
@@ -104,9 +104,7 @@ class Transformer(tf.keras.Model):
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=mask_decoder, training=training)
 
-        # Not sure about this part
-        output = tf.keras.layers.Flatten()(output_decoder)
-        output = self.final(output)
+        output = self.final(output_decoder)
 
         return output
 
@@ -149,17 +147,25 @@ class Transformer(tf.keras.Model):
 
         return loss, accuracy
 
-    def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, wandb_api=True, file_to_save = None):
+    def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, validation_split = 0.0, wandb_api=True, file_to_save = None):
 
         if wandb_api:
             wandb.init(project="Chess-Transformer", entity="epideixx")
 
-        dataset = tf.data.Dataset.zip((x, y))
-        dataset = dataset.shuffle(32000).batch(batch_size=batch_size)
+        train_size = int((1-validation_split) * len(x))
+        x_train = x.take(train_size)
+        y_train = y.take(train_size)
+        x_valid = x.skip(train_size)
+        y_valid = y.skip(train_size)
+        
+        train_dataset = tf.data.Dataset.zip((x_train, y_train))
+
+
+        train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
 
         for _ in range(num_epochs):
 
-            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(dataset):
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(train_dataset):
 
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
@@ -167,13 +173,28 @@ class Transformer(tf.keras.Model):
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
                 if file_to_save :
-                    if batch % 20 == 0: # To edit
+                    if batch % 200 == 0: # To edit
                         if not os.path.exists(os.path.join(os.path.dirname(__file__), file_to_save)):
                             os.makedirs(os.path.join(
                                 os.path.dirname(__file__), file_to_save))
                         filename = os.path.join(os.path.dirname(__file__),
                                                 file_to_save, file_to_save)
                         self.save_weights(filename)
+            
+
+            # Validation set
+            valid_dataset = tf.data.Dataset.zip((x_valid, y_valid)).batch(batch_size=len(x_valid))
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(valid_dataset):
+                
+                predict_outputs = self(input=(encoder_inputs, decoder_inputs), training=False)
+                loss = self.loss(transfo_real_outputs, predict_outputs)
+                accuracy = self.accuracy(transfo_real_outputs, predict_outputs)
+                if wandb_api:
+                    wandb.log({"valid_loss": loss, "valid_accuracy": accuracy})
+                print("Validation loss : ", loss)
+                print("Validation accuracy : ", accuracy)
+
+
 
 
 # Test
@@ -220,8 +241,10 @@ if __name__ == '__main__':
     dec_input = decoder_tokenize.texts_to_sequences(
         dec_input, maxlen=max_moves_in_game)
 
-    output_decoder = transfo.call((enc_input, dec_input))
+    output_decoder = transfo((enc_input, dec_input))
 
-    transfo.build(input_shape=[enc_input.shape, dec_input.shape])  # Chelou ...
+    print(output_decoder)
+
+    # transfo.build(input_shape=[enc_input.shape, dec_input.shape])  # Chelou ...
 
     print("ok")

@@ -9,8 +9,6 @@ import sys
 # adding Folder_2 to the system path
 sys.path.insert(1, 'C:/Users/jonat/OneDrive/Documents/CentraleSupelec/2A/Echecs2A/Text-Generation-Chess/Made_by_Hand')
 
-print(sys.path)
-
 import numpy as np
 from tokenizer import ChessTokenizer as TTTTokenizer
 from import_data import import_data
@@ -29,12 +27,13 @@ transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves,
 transfo2 = Transformer(vocab_moves=vocab_moves,
                        length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4, dropout=0.1)
 
-filename = os.path.join(os.path.dirname(__file__), "fen.txt")
+filename = os.path.join(os.path.dirname(__file__), "test.txt")
 dataset = import_data(filename=filename)
 dataset = list(zip(*dataset))
 
 encoder_tokenize = TTTTokenizer(char_level = True)
 decoder_tokenize = TTTTokenizer()
+
 
 encoder_tokenize.fit_on_texts(list(dataset[0]))
 decoder_tokenize.fit_on_texts(list(dataset[1]))
@@ -46,11 +45,10 @@ tok_encoder = encoder_tokenize.texts_to_sequences(
 tok_decoder = decoder_tokenize.texts_to_sequences(
     list(dataset[2]), maxlen=max_moves_in_game)
 tok_output = decoder_tokenize.texts_to_sequences(
-    list(dataset[1]))
+    list(dataset[1]), maxlen=max_moves_in_game)
 
 x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=False, file_to_save = None)
-print(transfo.summary())
+transfo.fit(x=x, y=y, batch_size=256, num_epochs=10, wandb_api=True, file_to_save = "Test_TTT_1404", validation_split = 0.2)

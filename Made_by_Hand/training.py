@@ -35,7 +35,7 @@ tok_encoder = encoder_tokenize.texts_to_sequences(
 tok_decoder = decoder_tokenize.texts_to_sequences(
     list(dataset[2]), maxlen=max_moves_in_game)
 tok_output = decoder_tokenize.texts_to_sequences(
-    list(dataset[1]))
+    list(dataset[1]),  maxlen=max_moves_in_game)
 
 x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
