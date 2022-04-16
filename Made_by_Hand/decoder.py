@@ -58,17 +58,28 @@ class DecoderBlock(tf.keras.Model):
 
     def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, padding_mask_enc_dec: tf.Tensor = None, training: bool = False):
         """
+        Feed-forward through the Decoder block
         Parameters
         ----------
-        input : tf.Tensor, shape = (..., vocab_size, model_size)
+        input : tf.Tensor, shape = (batch_size, vocab_size, model_size)
             Input of the Decoder block, from another block or the Embedding layer
-        encoder_output : tf.Tensor, shape = (..., vocab_size, model_size)
+        encoder_output : tf.Tensor, shape = (batch_size, vocab_size, model_size)
             Output of the Encoder block
-        padding_mask : None or tf.Tensor, shape = ()
-            TO COMPLETE
+        padding_mask : None or tf.Tensor, shape = (batch_size, vocab_size, vocab_size) TO CONFIRM
+            Mask to apply on the data in the first multi-attention head
+        padding_mask_enc_dec : None or tf.Tensor, shape = (???)
+            Mask to apply on the data in the second multi-attention head
+        training : bool, default = False
+            True if model is training
 
         Returns
         -------
+        block_output : tf.Tensor, shape = (batch_size, vocab_size, model_size)
+            Output of the Decoder block
+        masked_attention_block : tf.Tensor, sahpe = (???)
+            Attention from the first multi-head attention
+        attention_block : tf.Tensor, sahpe = (???)
+            Attention from the first multi-head attention
         """
 
         input_norm = self.input_norm(input)
@@ -139,11 +150,21 @@ class Decoder(tf.keras.Model):
             Input of the Decoder block, from another block or the Embedding layer
         encoder_output : tf.Tensor, shape = (..., vocab_size, model_size)
             Output of the Encoder block
-        padding_mask : None or tf.Tensor, shape = ()
-            TO COMPLETE
+        padding_mask : None or tf.Tensor, shape = (batch_size, vocab_size, vocab_size) TO CONFIRM
+            Mask to apply on the data in the first multi-attention head of each Decoder block
+        padding_mask_enc_dec : None or tf.Tensor, shape = (???)
+            Mask to apply on the data in the second multi-attention head of each Decoder block
+        training : bool, default = False
+            True if model is training
 
         Returns
         -------
+        output : tf.Tensor, shape = (batch_size, vocab_size, model_size)
+            Output of the Decoder
+        masked_attention : tf.Tensor, sahpe = (???)
+            Attention from the first multi-head attention of each Decoder block
+        attention : tf.Tensor, sahpe = (???)
+            Attention from the first multi-head attention of each Decoder block
         """
 
         output = input

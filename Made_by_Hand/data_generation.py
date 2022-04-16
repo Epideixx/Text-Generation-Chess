@@ -9,8 +9,24 @@ import re
 MAX_IMPORT = 50000
 
 
-def importPgn(filename, set_to_add, max_import=10000):
+def importPgn(filename : str, set_to_add, max_import=10000):
+    """
+    Read a pgn file to import moves in set_to_add.
 
+    Parameters
+    ----------
+    filename : str
+        Pgn file containing several games of chess
+    set_to_add : set
+        Set containing the lines to write in the future text file
+    max_import : int, default = 10000
+        Max number of games to import from the file
+
+    Returns
+    -------
+    counter : int
+        Number of imported games
+    """
     counter = 0
     total = 0  # Number of games to import (just for tqdm display)
 
@@ -71,6 +87,17 @@ def importPgn(filename, set_to_add, max_import=10000):
 
 
 def generate(file_to_write="fen.txt", max_import=MAX_IMPORT):
+    """
+    Write in the file_to_write the data from pgn files with a specific syntax : board - move_to_play - previous_moves
+
+    Parameters
+    ----------
+    file_to_write : str, default = "fen.txt"
+        Text file in which we write data from pgn files.
+        Lines are written with the rule : board - move_to_play - previous_moves
+    max_import : int
+        Max number of games to import
+    """
 
     games = 0
     moves = 0
