@@ -6,17 +6,26 @@ import tensorflow as tf
 
 
 class MaskedSparseCategoricalEntropy(tf.keras.losses.Loss):
-
+    
     def __init__(self, from_logits: bool = False):
         super(MaskedSparseCategoricalEntropy, self).__init__()
         self.from_logits = from_logits
         self.crossentropy = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits=from_logits)
 
-    def __call__(self, y_true: tf.Tensor, y_pred: tf.Tensor):
-
+    def __call__(self, y_true: tf.Tensor, y_pred: tf.Tensor, sample_weight = None):
+        """
+        Parameters
+        ----------
+        sample_weight : float in [0.0, 1.0]
+            Weight of the last move, the one which is predicted
+        """
         mask = tf.math.logical_not(tf.math.equal(y_true, 0))
         mask = tf.cast(mask, dtype=tf.float32)
+        if sample_weight : 
+            sum_mask = tf.reduce_sum(mask, axis = -1)
+            sample_weight = tf.multiply( tf.transpose(tf.concat([tf.expand_dims(tf.fill(mask.shape[1], (1 - sample_weight)/sum_mask[i]), axis = -1) for i in range(mask.shape[0])], axis = -1)), mask)
+            # Add initial sample_weight to the last non-zero value
         loss = tf.cast(self.crossentropy(y_true, y_pred), tf.float32)
         loss *= mask
 

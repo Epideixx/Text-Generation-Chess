@@ -24,10 +24,8 @@ vocab_board = 10
 
 transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves,
                       length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4, dropout=0.1)
-transfo2 = Transformer(vocab_moves=vocab_moves,
-                       length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4, dropout=0.1)
 
-filename = os.path.join(os.path.dirname(__file__), "fen.txt")
+filename = os.path.join(os.path.dirname(__file__), "test.txt")
 dataset = import_data(filename=filename)
 dataset = list(zip(*dataset))
 
@@ -51,4 +49,4 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=256, num_epochs=30, wandb_api=True, file_to_save = "Test_TTT_1404", validation_split = 0.2)
+transfo.fit(x=x, y=y, batch_size=32, num_epochs=5, wandb_api=False, file_to_save = None, validation_split = 0.2)

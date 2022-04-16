@@ -7,14 +7,16 @@ TO DO:
 - Générer plus de données plus rapidement ==> IDEE : MCTS avec une part d'aléatoire variable DONE
 - En fait, à chaque fois qu'on regénère des données, il supprimait les anciennes ... DONE
 - Faire un validation_split DONE
-- Faire un entraînement massif
+- Faire un entraînement massif IN PROGRESS
 - Pouvoir jouer contre lui
 
-- VOIR SI ON PEUT changer FLATTEN parce que là y a QUE la classification finale qui s'entraîne quasiment !!!!!!! IN PROGRESS
+- VOIR SI ON PEUT changer FLATTEN parce que là y a QUE la classification finale qui s'entraîne quasiment !!!!!!! DONE
 EXPLICATION : 
 En fait, on cherche pas à prédire juste le dernier coup mais l'ensemble des coups qui ont été joués jusque là plus le futur coup...
 C'est pour ça qu'il y a le "start" et le "stop" pour l'entraînement normalement.
 Et possiblement faudra changer la fonction de coût
+- Transformer fonction de coût pour qu'elle target beaucoup plus le dernier coup que les autres au bout d'un moment d'entraînement
+- Prendre meilleure accuracy DONE
 
 - Et si ça marche, on passe sur la partie analyse du réseau
 
