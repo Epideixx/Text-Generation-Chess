@@ -157,7 +157,7 @@ class Transformer(tf.keras.Model):
             train_size = int((1-validation_split) * len(x))
         else :
             train_size = len(x)
-            
+
         x_train = x.take(train_size)
         y_train = y.take(train_size)
         x_valid = x.skip(train_size)
@@ -188,16 +188,17 @@ class Transformer(tf.keras.Model):
             
 
             # Validation set
-            valid_dataset = tf.data.Dataset.zip((x_valid, y_valid)).batch(batch_size=len(x_valid))
-            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(valid_dataset):
-                
-                predict_outputs = self(input=(encoder_inputs, decoder_inputs), training=False)
-                loss = self.loss(transfo_real_outputs, predict_outputs)
-                accuracy = self.accuracy(transfo_real_outputs, predict_outputs)
-                if wandb_api:
-                    wandb.log({"valid_loss": loss, "valid_accuracy": accuracy})
-                print("Validation loss : ", loss)
-                print("Validation accuracy : ", accuracy)
+            if validation_split :
+                valid_dataset = tf.data.Dataset.zip((x_valid, y_valid)).batch(batch_size=len(x_valid))
+                for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(valid_dataset):
+                    
+                    predict_outputs = self(input=(encoder_inputs, decoder_inputs), training=False)
+                    loss = self.loss(transfo_real_outputs, predict_outputs)
+                    accuracy = self.accuracy(transfo_real_outputs, predict_outputs)
+                    if wandb_api:
+                        wandb.log({"valid_loss": loss, "valid_accuracy": accuracy})
+                    print("Validation loss : ", loss)
+                    print("Validation accuracy : ", accuracy)
 
 
 
