@@ -48,4 +48,17 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=64, num_epochs=5, wandb_api=False, file_to_save = "Test1_2104", validation_split = None)
+
+# Everything to save
+folder_to_save = os.path.join(os.path.dirname(__file__), "Test1_2104")
+if not os.path.exists(folder_to_save):
+    os.makedirs(folder_to_save)
+encoder_tok_json = encoder_tokenize.tokenizer.to_json()
+decoder_tok_json = decoder_tokenize.tokenizer.to_json()
+with open(os.path.join(folder_to_save, "encoder_tokenizer"), 'w') as outfile:
+    outfile.write(encoder_tok_json)
+
+with open(os.path.join(folder_to_save, "decoder_tokenizer"), 'w') as outfile:
+    outfile.write(decoder_tok_json)
+
+transfo.fit(x=x, y=y, batch_size=64, num_epochs=5, wandb_api=False, file_to_save = folder_to_save, validation_split = None)

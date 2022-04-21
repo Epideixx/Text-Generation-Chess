@@ -179,11 +179,10 @@ class Transformer(tf.keras.Model):
 
                 if file_to_save :
                     if batch % 200 == 0: # To edit
-                        if not os.path.exists(os.path.join(os.path.dirname(__file__), file_to_save)):
-                            os.makedirs(os.path.join(
-                                os.path.dirname(__file__), file_to_save))
-                        filename = os.path.join(os.path.dirname(__file__),
-                                                file_to_save, file_to_save)
+                        if not os.path.exists(file_to_save):
+                            os.makedirs(file_to_save)
+                        print(file_to_save)
+                        filename = os.path.join(file_to_save, "model_weights")
                         self.save_weights(filename)
             
 
