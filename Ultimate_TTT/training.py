@@ -3,19 +3,18 @@
 # ------------------------------------------------------
 
 
-# importing sys
+import os
 import sys
   
 # adding Folder_2 to the system path
-sys.path.insert(1, 'C:/Users/jonat/OneDrive/Documents/CentraleSupelec/2A/Echecs2A/Text-Generation-Chess/Made_by_Hand')
+path_transfo_modules = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Made_by_Hand")
+sys.path.insert(1, path_transfo_modules)
 
 import numpy as np
 from tokenizer import ChessTokenizer as TTTTokenizer
 from import_data import import_data
 from transformer import Transformer
 import tensorflow as tf
-import os
-
 
 length_board = 140
 max_moves_in_game = 81
@@ -23,7 +22,7 @@ vocab_moves = 90
 vocab_board = 10
 
 transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves,
-                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4, dropout=0.1)
+                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=8, dropout=0.1)
 
 filename = os.path.join(os.path.dirname(__file__), "test.txt")
 dataset = import_data(filename=filename)
@@ -49,4 +48,4 @@ x = tf.data.Dataset.from_tensor_slices(
     (tok_encoder, tok_decoder))
 y = tf.data.Dataset.from_tensor_slices(tok_output)
 
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=5, wandb_api=False, file_to_save = None, validation_split = 0.2)
+transfo.fit(x=x, y=y, batch_size=64, num_epochs=5, wandb_api=False, file_to_save = "Test1_2104", validation_split = None)

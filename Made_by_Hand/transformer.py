@@ -3,6 +3,7 @@
 # ------------------------------------------------------
 
 from base64 import decode
+from attr import validate
 import tensorflow as tf
 import numpy as np
 import wandb
@@ -137,7 +138,7 @@ class Transformer(tf.keras.Model):
             input = encoder_inputs, decoder_inputs
             transfo_predict_outputs = self(input=input, training=True)
             loss = self.loss(transfo_real_outputs,
-                             transfo_predict_outputs, sample_weight = 0.1)
+                             transfo_predict_outputs, sample_weight = None)
 
         gradients = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(
@@ -151,8 +152,12 @@ class Transformer(tf.keras.Model):
 
         if wandb_api:
             wandb.init(project="Chess-Transformer", entity="epideixx")
-
-        train_size = int((1-validation_split) * len(x))
+        
+        if validation_split:
+            train_size = int((1-validation_split) * len(x))
+        else :
+            train_size = len(x)
+            
         x_train = x.take(train_size)
         y_train = y.take(train_size)
         x_valid = x.skip(train_size)

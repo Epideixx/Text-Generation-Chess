@@ -20,12 +20,15 @@ class MaskedSparseCategoricalEntropy(tf.keras.losses.Loss):
         sample_weight : float in [0.0, 1.0]
             Weight of the last move, the one which is predicted
         """
+
         mask = tf.math.logical_not(tf.math.equal(y_true, 0))
         mask = tf.cast(mask, dtype=tf.float32)
+
         if sample_weight : 
             sum_mask = tf.reduce_sum(mask, axis = -1)
-            sample_weight = tf.multiply( tf.transpose(tf.concat([tf.expand_dims(tf.fill(mask.shape[1], (1 - sample_weight)/sum_mask[i]), axis = -1) for i in range(mask.shape[0])], axis = -1)), mask)
+            sample_weight_in_progress = tf.multiply( tf.transpose(tf.concat([tf.expand_dims(tf.fill(mask.shape[1], (1 - sample_weight)/sum_mask[i]), axis = -1) for i in range(mask.shape[0])], axis = -1)), mask)
             # Add initial sample_weight to the last non-zero value
+            # For the moment I give up ...
         loss = tf.cast(self.crossentropy(y_true, y_pred), tf.float32)
         loss *= mask
 
