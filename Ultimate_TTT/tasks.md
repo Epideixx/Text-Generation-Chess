@@ -18,6 +18,7 @@ C'est pour ça qu'il y a le "start" et le "stop" pour l'entraînement normalemen
 Et possiblement faudra changer la fonction de coût
 - Transformer fonction de coût pour qu'elle target beaucoup plus le dernier coup que les autres au bout d'un moment d'entraînement ABANDON FOR THE MOMENT
 - Prendre meilleure accuracy DONE
+- Regarder le Embedding "Gradients do not exist"
 
 - Et si ça marche, on passe sur la partie analyse du réseau
 
