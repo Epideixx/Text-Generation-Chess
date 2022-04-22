@@ -127,7 +127,7 @@ class Transformer(tf.keras.Model):
         output = self(input=input)
         output = tf.argmax(output, axis=-1)
 
-        output = [output.numpy()[i][0] for i in range(output.shape[0])]
+        output = output.numpy()
 
         return output
 

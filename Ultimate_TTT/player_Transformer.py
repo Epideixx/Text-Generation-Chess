@@ -35,22 +35,28 @@ class Transfo_player():
                       length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=8, dropout=0.1)
         self.transfo.load_weights(os.path.join(player_folder, "model_weights"))
 
-        with open(os.path.join(player_folder, 'encoder_tokenizer')) as encoder_tokenizer_data:
-            data = encoder_tokenizer_data.read()
-            self.encoder_tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(data)
+        encoder_filepath = os.path.join(player_folder, 'encoder_tokenizer')
+        self.encoder_tokenizer = TTTTokenizer()
+        self.encoder_tokenizer.load(encoder_filepath)
 
-        with open(os.path.join(player_folder, 'decoder_tokenizer')) as decoder_tokenizer_data:
-            data = decoder_tokenizer_data.read()
-            self.decoder_tokenizer = tf.keras.preprocessing.text.tokenizer_from_json(data)
+        decoder_filepath = os.path.join(player_folder, 'decoder_tokenizer')
+        self.decoder_tokenizer = TTTTokenizer()
+        self.decoder_tokenizer.load(decoder_filepath)
 
 
 
     def choose_move(self, board, previous_moves):
-        pass
+        board = self.encoder_tokenizer.texts_to_sequences(board, maxlen=length_board)
+        previous_moves = self.decoder_tokenizer.texts_to_sequences(previous_moves, maxlen=max_moves_in_game)
+        output_token = self.transfo.predict(board, previous_moves)
+        output_moves = self.decoder_tokenizer.sequences_to_texts(output_token)
+        return output_moves
+
         
 
 if __name__ == '__main__':
-    test = Transfo_player(os.path.join(os.path.dirname(__file__), "Test1_2104"))
-    print(test.decoder_tokenizer.sequences_to_texts([[1, 4, 10]]))
+    test = Transfo_player(os.path.join(os.path.dirname(__file__), "Test2_2104"))
+    moves = test.choose_move(['|..x|x..|.o.|||...|..x|...|||oxo|...|...|||x..|o..|...|||..x|o..|ox.|||...|...|o.o|||.o.|...|...|||..x|..o|.xx|||x..|...|...||||||.........'], ['C1 H5 E7 E3 D0 C0 I0 G1 A3 C2 H8 E6 E2 F6 H2 F8 H7 D3 A2 A7'])
+    print(moves)
     print('ok')
 

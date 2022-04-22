@@ -8,7 +8,8 @@ TO DO:
 - En fait, à chaque fois qu'on regénère des données, il supprimait les anciennes ... DONE
 - Faire un validation_split DONE
 - Faire un entraînement massif IN PROGRESS
-- Pouvoir jouer contre lui
+- Pouvoir jouer contre lui -> Il faudrait save parameters of transformer ... (Later)
+
 
 - VOIR SI ON PEUT changer FLATTEN parce que là y a QUE la classification finale qui s'entraîne quasiment !!!!!!! DONE
 EXPLICATION : 

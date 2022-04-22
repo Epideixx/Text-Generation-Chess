@@ -1,4 +1,5 @@
 import os
+import pickle
 from matplotlib.pyplot import cla
 from tqdm import tqdm
 import tensorflow as tf
@@ -46,6 +47,21 @@ class ChessTokenizer(tf.keras.preprocessing.text.Tokenizer):
             tokens, padding='post', maxlen=maxlen)
 
         return tokens
+        
+
+    def sequences_to_texts(self, sequences):
+        return self.tokenizer.sequences_to_texts(sequences)
+
+
+    def save(self, filepath : str):
+        filepath += ".pickle"
+        with open(filepath, 'wb') as handle:
+            pickle.dump(self.tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def load(self, filepath : str):
+        filepath += ".pickle"
+        with open(filepath, 'rb') as handle:
+            self.tokenizer = pickle.load(handle)
 
 
 # Test
@@ -60,3 +76,8 @@ if __name__ == '__main__':
 
     print(len(token))
     print(len(phrase_test))
+
+    tokenizer.save(os.path.join(os.path.dirname(__file__), "Test_tokenizer"))
+    tokenizer2 = ChessTokenizer()
+    tokenizer2.load(os.path.join(os.path.dirname(__file__), "Test_tokenizer"))
+    print(tokenizer2.tokenizer.word_index)
