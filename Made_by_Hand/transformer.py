@@ -2,12 +2,12 @@
 #                   Transformer
 # ------------------------------------------------------
 
-from base64 import decode
-from attr import validate
+
 import tensorflow as tf
 import numpy as np
 import wandb
 import os
+from tqdm import tqdm
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -49,6 +49,8 @@ class Transformer(tf.keras.Model):
 
         self.encoder_embedding = TextEmbedder(
             vocab_size=vocab_board, depth_emb=model_size)
+        # print("Allez allez :")
+        # print(self.encoder_embedding.trainable_variables)
         self.encoder_PE = PositionalEncoding(
             seq_length=length_board, depth=model_size)
         self.encoder = Encoder(
@@ -84,7 +86,9 @@ class Transformer(tf.keras.Model):
         """
         input_encoder, input_decoder = input
         tok_encoder = input_encoder
+        # print("Test 0 : ", self.encoder_embedding.trainable_variables)
         emb_encoder = self.encoder_embedding(tok_encoder)
+        # print("Test 1 : ", self.encoder_embedding.trainable_variables)
         pes_encoder = self.encoder_PE()
         in_encoder = emb_encoder + pes_encoder
         mask_encoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
@@ -140,6 +144,7 @@ class Transformer(tf.keras.Model):
             loss = self.loss(transfo_real_outputs,
                              transfo_predict_outputs, sample_weight = None)
 
+
         gradients = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(
             zip(gradients, self.trainable_variables))
@@ -168,12 +173,14 @@ class Transformer(tf.keras.Model):
 
         train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
 
-        for _ in range(num_epochs):
+        for epoch in range(num_epochs):
 
-            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(train_dataset):
-
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
+                
+                # emb_weights = self.encoder_embedding.get_weights()
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
+                # print([self.encoder_embedding.get_weights()[i] - emb_weights[i] for i in range(len(emb_weights))])
                 if wandb_api:
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
