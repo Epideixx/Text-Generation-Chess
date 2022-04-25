@@ -22,9 +22,9 @@ vocab_moves = 90
 vocab_board = 10
 
 transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves,
-                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4, dropout=0.1)
+                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=6, dropout=0.1)
 
-filename = os.path.join(os.path.dirname(__file__), "test.txt")
+filename = os.path.join(os.path.dirname(__file__), "fen.txt")
 dataset = import_data(filename=filename)
 dataset = list(zip(*dataset))
 
@@ -50,16 +50,10 @@ y = tf.data.Dataset.from_tensor_slices(tok_output)
 
 
 # Everything to save
-folder_to_save = os.path.join(os.path.dirname(__file__), "Test1_2204")
+folder_to_save = os.path.join(os.path.dirname(__file__), "Official_25_04_22")
 if not os.path.exists(folder_to_save):
     os.makedirs(folder_to_save)
-# encoder_tok_json = encoder_tokenize.tokenizer.to_json()
-# decoder_tok_json = decoder_tokenize.tokenizer.to_json()
-# with open(os.path.join(folder_to_save, "encoder_tokenizer"), 'w') as outfile:
-#     outfile.write(encoder_tok_json)
 
-# with open(os.path.join(folder_to_save, "decoder_tokenizer"), 'w') as outfile:
-#     outfile.write(decoder_tok_json)
 
 encoder_filepath = os.path.join(folder_to_save, "encoder_tokenizer")
 encoder_tokenize.save(encoder_filepath)
@@ -67,4 +61,4 @@ encoder_tokenize.save(encoder_filepath)
 decoder_filepath = os.path.join(folder_to_save, "decoder_tokenizer")
 decoder_tokenize.save(decoder_filepath)
 
-transfo.fit(x=x, y=y, batch_size=64, num_epochs=10, wandb_api=False, file_to_save = None, validation_split = 0.02)
+transfo.fit(x=x, y=y, batch_size=64, num_epochs=10, wandb_api=True, file_to_save = folder_to_save, validation_split = 0.02)

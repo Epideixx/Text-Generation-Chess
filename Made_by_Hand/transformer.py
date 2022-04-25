@@ -2,12 +2,11 @@
 #                   Transformer
 # ------------------------------------------------------
 
-from base64 import decode
-from attr import validate
 import tensorflow as tf
 import numpy as np
 import wandb
 import os
+from tqdm import tqdm
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -168,9 +167,9 @@ class Transformer(tf.keras.Model):
 
         train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
 
-        for _ in range(num_epochs):
+        for epoch in range(num_epochs):
 
-            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(train_dataset):
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
 
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
