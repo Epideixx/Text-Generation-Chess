@@ -2,7 +2,6 @@
 #                    Text Embedding
 # ------------------------------------------------------
 
-from dataclasses import dataclass
 import tensorflow as tf
 from tokenizer import ChessTokenizer
 
@@ -23,7 +22,11 @@ class TextEmbedder(tf.keras.layers.Layer):
         self.vocab_size = vocab_size
         self.depth = depth_emb
         self.embedding = tf.keras.layers.Embedding(
+<<<<<<< HEAD
             input_dim=vocab_size, output_dim=depth_emb, trainable = True)
+=======
+            input_dim=vocab_size, output_dim=depth_emb, trainable  =True)
+>>>>>>> UltimateTicTacToe
         self.embedding.build(vocab_size)
 
 

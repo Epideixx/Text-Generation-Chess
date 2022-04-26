@@ -2,7 +2,10 @@
 #                   Transformer
 # ------------------------------------------------------
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> UltimateTicTacToe
 import tensorflow as tf
 import numpy as np
 import wandb
@@ -174,6 +177,11 @@ class Transformer(tf.keras.Model):
         train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
 
         for epoch in range(num_epochs):
+<<<<<<< HEAD
+=======
+
+            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
+>>>>>>> UltimateTicTacToe
 
             for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
                 
