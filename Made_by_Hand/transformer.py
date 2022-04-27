@@ -69,7 +69,7 @@ class Transformer(tf.keras.Model):
         self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
         self.accuracy = ClassicAccuracy()
-        self.loss = tf.keras.losses.SparseCategoricalCrossentropy()
+        self.loss = MaskedSparseCategoricalEntropy()
 
     def call(self, input, training: bool = False):
         """
@@ -141,7 +141,7 @@ class Transformer(tf.keras.Model):
             input = encoder_inputs, decoder_inputs
             transfo_predict_outputs = self(input=input, training=True)
             loss = self.loss(transfo_real_outputs,
-                             transfo_predict_outputs, sample_weight = None)
+                             transfo_predict_outputs)
 
 
         gradients = tape.gradient(loss, self.trainable_variables)
