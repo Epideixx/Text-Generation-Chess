@@ -23,9 +23,9 @@ vocab_moves = 90
 vocab_board = 10
 
 transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves,
-                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=6, dropout=0.1)
+                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=4, dropout=0)
 
-filename = os.path.join(os.path.dirname(__file__), "fen.txt")
+filename = os.path.join(os.path.dirname(__file__), "test.txt")
 dataset = import_data(filename=filename)
 dataset = list(zip(*dataset))
 
@@ -62,9 +62,5 @@ encoder_tokenize.save(encoder_filepath)
 decoder_filepath = os.path.join(folder_to_save, "decoder_tokenizer")
 decoder_tokenize.save(decoder_filepath)
 
-<<<<<<< HEAD
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=1, wandb_api=False, file_to_save = None, validation_split = 0.02)
+transfo.fit(x=x, y=y, batch_size=32, num_epochs=5, wandb_api=True, file_to_save = None, validation_split = 0.02)
 print(transfo.summary())
-=======
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=10, wandb_api=False, file_to_save = None, validation_split = 0.02)
->>>>>>> UltimateTicTacToe

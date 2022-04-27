@@ -2,10 +2,6 @@
 #                   Transformer
 # ------------------------------------------------------
 
-<<<<<<< HEAD
-
-=======
->>>>>>> UltimateTicTacToe
 import tensorflow as tf
 import numpy as np
 import wandb
@@ -72,8 +68,8 @@ class Transformer(tf.keras.Model):
         # For training ==> TO MAKE EVOLVE
         self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
-        self.accuracy = MaskedAccuracy()
-        self.loss = MaskedSparseCategoricalEntropy()
+        self.accuracy = ClassicAccuracy()
+        self.loss = tf.keras.losses.SparseCategoricalCrossentropy()
 
     def call(self, input, training: bool = False):
         """
@@ -177,11 +173,6 @@ class Transformer(tf.keras.Model):
         train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
 
         for epoch in range(num_epochs):
-<<<<<<< HEAD
-=======
-
-            for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
->>>>>>> UltimateTicTacToe
 
             for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
                 
