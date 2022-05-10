@@ -27,7 +27,9 @@ transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves,
 
 filename = os.path.join(os.path.dirname(__file__), "fen.txt")
 dataset = import_data(filename=filename)
-dataset = list(zip(*dataset))
+
+beginning = 500000
+dataset = list(zip(*dataset[beginning:beginning+ 15000]))
 
 encoder_tokenize = TTTTokenizer(char_level = True)
 decoder_tokenize = TTTTokenizer()
@@ -62,4 +64,4 @@ encoder_tokenize.save(encoder_filepath)
 decoder_filepath = os.path.join(folder_to_save, "decoder_tokenizer")
 decoder_tokenize.save(decoder_filepath)
 
-transfo.fit(x=x, y=y, batch_size=32, num_epochs=10, wandb_api=False, file_to_save = None, validation_split = 0.02)
+transfo.fit(x=x, y=y, batch_size=32, num_epochs=10, wandb_api=True, file_to_save = None, validation_split = None)

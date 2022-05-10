@@ -13,7 +13,7 @@ from embedding import TextEmbedder
 from positional_encoding import PositionalEncoding
 from encoder import Encoder
 from decoder import Decoder
-from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy, ClassicAccuracy
+from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy, ClassicAccuracy, CustomSchedule
 
 
 from import_data import import_data
@@ -64,7 +64,8 @@ class Transformer(tf.keras.Model):
         self.final = tf.keras.layers.Dense(vocab_moves, activation="softmax")
 
         # For training ==> TO MAKE EVOLVE
-        self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
+        learning_rate = CustomSchedule(model_size)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
         self.accuracy = MaskedAccuracy()
         self.loss = MaskedSparseCategoricalEntropy()
