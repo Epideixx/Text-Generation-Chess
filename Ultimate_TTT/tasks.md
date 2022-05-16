@@ -1,0 +1,39 @@
+TO DO:
+- Vérifier le bon fonctionnement du MCTS DONE
+- Implémenter une représentation string pour le Transformer DONE
+- Créer un générateur de données DONE
+- Entraîner le Transformer custom pour TTT DONE
+
+- Générer plus de données plus rapidement ==> IDEE : MCTS avec une part d'aléatoire variable DONE
+- En fait, à chaque fois qu'on regénère des données, il supprimait les anciennes ... DONE
+- Faire un validation_split DONE
+- Faire un entraînement massif IN PROGRESS
+- Pouvoir jouer contre lui IN PROGRESS -> Il faudrait save parameters of transformer ... (Later)
+
+
+- VOIR SI ON PEUT changer FLATTEN parce que là y a QUE la classification finale qui s'entraîne quasiment !!!!!!! DONE
+EXPLICATION : 
+En fait, on cherche pas à prédire juste le dernier coup mais l'ensemble des coups qui ont été joués jusque là plus le futur coup...
+C'est pour ça qu'il y a le "start" et le "stop" pour l'entraînement normalement.
+Et possiblement faudra changer la fonction de coût
+- Transformer fonction de coût pour qu'elle target beaucoup plus le dernier coup que les autres au bout d'un moment d'entraînement ABANDON FOR THE MOMENT
+- Prendre meilleure accuracy DONE
+- Regarder le Embedding "Gradients do not exist" DONE
+- Installer Cuda DONE
+
+- On va voir s'il y a des segments sur lesquels il apprend mieux
+
+- Et si ça marche, on passe sur la partie analyse du réseau
+
+Projet : Deadline générale = 1 Juin
+- Trouver ce qui marchait avant ==> C'est sans aucun doute le shuffle(32000) !!!!!!!!!!!!!!!!!!
+- Réussir un entraînement
+- Faire apprendre au fur et à mesure des parties de plus en plus hard
+- Mettre en place un interface graphique 
+- Mettre en place un joueur Transformer
+- Obtenir des résultats
+
+NOTES :
+- Ben en fait, faut peut-être lui dire pour qui il joue le coco, parce que du coup il sait pas qui il fait gagner ...
+D'ailleurs, ici, on est toujours X normalement ! (grâce à la façon dont le jeu est encodé)
+- Changer Transformer pour vocab board parce que pas d'espace entre les lettres du plateau DONE

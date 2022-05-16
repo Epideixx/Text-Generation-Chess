@@ -1,6 +1,7 @@
 # Main files 
 wandb
 /test_transfo
+.vscode
 
 
 # Byte-compiled / optimized / DLL files

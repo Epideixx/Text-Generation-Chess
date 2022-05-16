@@ -18,7 +18,7 @@ class MultiHeadAttention(tf.keras.Model):
         ----------
         model_size : int
             Depth of the model
-        h : int
+        h : int, default = 8
             Number of heads, set to 8 by default as in the original paper
 
         """
