@@ -166,7 +166,8 @@ class Transformer(tf.keras.Model):
         train_dataset = tf.data.Dataset.zip((x_train, y_train))
 
 
-        train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
+        train_dataset = train_dataset.shuffle(32000).batch(batch_size=batch_size)
+        print(len(train_dataset))
 
         for epoch in range(num_epochs):
 
