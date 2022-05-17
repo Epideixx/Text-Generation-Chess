@@ -1,5 +1,6 @@
 import pygame, sys
 from game import TTT
+from time import sleep
 
 pygame.init()
 
@@ -34,17 +35,65 @@ def draw_lines():
             line_thickness = 5
         pygame.draw.line(screen, LINE_COLOR, (0, y), (600, y), line_thickness)
 
+def draw_circles(circles):
+    for (row, col) in circles:
+        pygame.draw.circle(screen, RED, center = (int(row * HEIGHT//9 + HEIGHT//18), int(col * WIDTH//9 + WIDTH//18)), radius = HEIGHT//25, width = 5)
+
+def draw_squares(squares):
+    for (row, col) in squares:
+        pygame.draw.line(screen, RED, (int(row * HEIGHT//9 + HEIGHT//60), int(col * WIDTH//9 + WIDTH//60)), (int((1+row) * HEIGHT//9 - HEIGHT//60), int((col + 1) * WIDTH//9 - WIDTH//60)), 5)
+        pygame.draw.line(screen, RED, (int((1+row) * HEIGHT//9 - HEIGHT//60), int(col * WIDTH//9 + WIDTH//60)), (int(row * HEIGHT//9 + HEIGHT//60), int((col + 1) * WIDTH//9 - WIDTH//60)), 5) 
+
+def draw_big_circles(circles):
+    for (row, col) in circles:
+        pygame.draw.circle(screen, RED, center = (int(row * HEIGHT//3 + HEIGHT//6), int(col * WIDTH//3 + WIDTH//6)), radius = HEIGHT//8, width = 5)
+
+def draw_big_squares(squares):
+    for (row, col) in squares:
+        pygame.draw.line(screen, RED, (int(row * HEIGHT//3 + HEIGHT//60), int(col * WIDTH//3 + WIDTH//60)), (int((1+row) * HEIGHT//3 - HEIGHT//60), int((col + 1) * WIDTH//3 - WIDTH//60)), 8)
+        pygame.draw.line(screen, RED, (int((1+row) * HEIGHT//3 - HEIGHT//60), int(col * WIDTH//3 + WIDTH//60)), (int(row * HEIGHT//3 + HEIGHT//60), int((col + 1) * WIDTH//3 - WIDTH//60)), 8)
+                    
 
 def play_game(player1 = "human", player2  ="human"):
     
     ttt = TTT()
 
-    draw_lines()
-
     players = [player1, player2]
     player = 0
-
+    squares = []
+    circles = []
+    big_squares = []
+    big_circles = []
+    area_to_play = None
+    change_player = False
+    wait = False
+    
     while True :
+        
+        if wait:
+            sleep(0.5)
+            wait = False
+
+        screen.fill(color = COLOR)
+
+        if area_to_play:
+            s = pygame.Surface((HEIGHT//3, WIDTH//3 ))
+            s.fill((0,0,0))
+            s.set_alpha(128)
+            screen.blit(s, (area_to_play[0] * HEIGHT//3, area_to_play[1] * WIDTH//3))
+        
+        else:
+            s = pygame.Surface((HEIGHT, WIDTH))
+            s.fill((0,0,0))
+            s.set_alpha(128)
+            screen.blit(s, (0,0))     
+
+        draw_lines()
+        draw_big_circles(big_circles)
+        draw_big_squares(big_squares)
+        draw_circles(circles)
+        draw_squares(squares)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -69,53 +118,70 @@ def play_game(player1 = "human", player2  ="human"):
 
                     if ttt.upperBoard[big_col, big_row, 0] == 1:
                         if player == 0:
-                            pygame.draw.circle(screen, RED, center = (int(big_row * HEIGHT//3 + HEIGHT//6), int(big_col * WIDTH//3 + WIDTH//6)), radius = HEIGHT//8, width = 5)
-
+                            big_circles.append((big_row, big_col))
+            
                         else:
-                            pygame.draw.line(screen, RED, (int(big_row * HEIGHT//3 + HEIGHT//60), int(big_col * WIDTH//3 + WIDTH//60)), (int((1+big_row) * HEIGHT//3 - HEIGHT//60), int((big_col + 1) * WIDTH//3 - WIDTH//60)), 5)
-                            pygame.draw.line(screen, RED, (int((1+big_row) * HEIGHT//3 - HEIGHT//60), int(big_col * WIDTH//3 + WIDTH//60)), (int(big_row * HEIGHT//3 + HEIGHT//60), int((big_col + 1) * WIDTH//3 - WIDTH//60)), 5)
+                            big_squares.append((big_row, big_col))
                     
+                    if ttt.upperBoard[little_col, little_row, 0] == 1 or ttt.upperBoard[little_col, little_row, 1]:
+                        area_to_play = None
                     else :
-                        s = pygame.Surface((HEIGHT//3, WIDTH//3 ))
-                        s.set_alpha(128)
-                        s.fill((255,255,255))
-                        screen.blit(s, (little_row * HEIGHT//3, little_col * WIDTH//3))
-                        # pygame.draw.rect(screen, color=RED, rect = (little_row * HEIGHT//3, little_col * WIDTH//3, HEIGHT//3, WIDTH//3 ))
+                        area_to_play = (little_row, little_col)
 
                     if player == 0:
-                        pygame.draw.circle(screen, RED, center = (int(clicked_row * HEIGHT//9 + HEIGHT//18), int(clicked_col * WIDTH//9 + WIDTH//18)), radius = HEIGHT//25, width = 5)
+                        circles.append((clicked_row, clicked_col))
 
                     else:
-                        pygame.draw.line(screen, RED, (int(clicked_row * HEIGHT//9 + HEIGHT//60), int(clicked_col * WIDTH//9 + WIDTH//60)), (int((1+clicked_row) * HEIGHT//9 - HEIGHT//60), int((clicked_col + 1) * WIDTH//9 - WIDTH//60)), 5)
-                        pygame.draw.line(screen, RED, (int((1+clicked_row) * HEIGHT//9 - HEIGHT//60), int(clicked_col * WIDTH//9 + WIDTH//60)), (int(clicked_row * HEIGHT//9 + HEIGHT//60), int((clicked_col + 1) * WIDTH//9 - WIDTH//60)), 5)
-                
-                    player = 1 - player    
-                    ttt = ttt.mirror()
+                        squares.append((clicked_row, clicked_col))
 
-    
+                    change_player = True
+
                 except Exception:
                     print("You cannot play this move")
-            
+
+
             if players[player] == "random":
                 clicked_col, clicked_row = ttt.playRandomMove()
-                ttt = ttt.mirror()
                 if player == 0:
-                    pygame.draw.circle(screen, RED, center = (int(clicked_row * HEIGHT//9 + HEIGHT//18), int(clicked_col * WIDTH//9 + WIDTH//18)), radius = HEIGHT//25, width = 5)
+                    circles.append((clicked_row, clicked_col))
 
                 else:
-                    pygame.draw.line(screen, RED, (int(clicked_row * HEIGHT//9 + HEIGHT//60), int(clicked_col * WIDTH//9 + WIDTH//60)), (int((1+clicked_row) * HEIGHT//9 - HEIGHT//60), int((clicked_col + 1) * WIDTH//9 - WIDTH//60)), 5)
-                    pygame.draw.line(screen, RED, (int((1+clicked_row) * HEIGHT//9 - HEIGHT//60), int(clicked_col * WIDTH//9 + WIDTH//60)), (int(clicked_row * HEIGHT//9 + HEIGHT//60), int((clicked_col + 1) * WIDTH//9 - WIDTH//60)), 5)
-            
-                player = 1 - player
+                    squares.append((clicked_row, clicked_col))
+                
+                big_row = clicked_row // 3
+                big_col = clicked_col // 3
+                little_row = clicked_row % 3
+                little_col = clicked_col % 3
+
+                if ttt.upperBoard[big_col, big_row, 0] == 1:
+                    if player == 0:
+                        big_circles.append((big_row, big_col))
+        
+                    else:
+                        big_squares.append((big_row, big_col))
+                
+                if ttt.upperBoard[little_col, little_row, 0] == 1 or ttt.upperBoard[little_col, little_row, 1]:
+                    area_to_play = None
+                else :
+                    area_to_play = (little_row, little_col)
+                
+                change_player = True
+                wait = True
 
             if ttt.game_over == True:
+                sleep(10)
                 ttt.show()
                 sys.exit()
+            
+            if change_player:
+                player = 1 - player    
+                ttt = ttt.mirror()
+                change_player = False
         
         pygame.display.update()
 
 
 if __name__ == '__main__':
     print(COLOR, tuple([c//2 for c in COLOR]))
-    play_game(player2="human")
+    play_game(player2="random")
     
