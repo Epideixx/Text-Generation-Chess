@@ -167,11 +167,6 @@ def play_game(player1 = "human", player2  ="human"):
                 
                 change_player = True
                 wait = True
-
-            if ttt.game_over == True:
-                sleep(10)
-                ttt.show()
-                sys.exit()
             
             if change_player:
                 player = 1 - player    
@@ -179,6 +174,11 @@ def play_game(player1 = "human", player2  ="human"):
                 change_player = False
         
         pygame.display.update()
+
+        if ttt.game_over == True:
+            sleep(5)
+            ttt.show()
+            sys.exit()
 
 
 if __name__ == '__main__':
