@@ -185,6 +185,9 @@ class Transformer(tf.keras.Model):
                         print(file_to_save)
                         filename = os.path.join(file_to_save, "model_weights")
                         self.save_weights(filename)
+
+                if batch == 0:
+                    print(self.summary())
             
 
             # Validation set
