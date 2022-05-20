@@ -1,0 +1,13 @@
+read fen.txt: 0 moves [00:00, ? moves/s]read fen.txt: 243041 moves [00:01, 243034.05 moves/s]read fen.txt: 555651 moves [00:02, 283959.60 moves/s]read fen.txt: 871157 moves [00:03, 298363.29 moves/s]read fen.txt: 1043569 moves [00:03, 294865.08 moves/s]
+wandb: Currently logged in as: epideixx (use `wandb login --relogin` to force relogin)
+wandb: wandb version 0.12.16 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.12.12
+wandb: Run data is saved locally in /gpfs/users/nguyenm/Text-Generation-Chess/wandb/run-20220520_100550-3gx64pwi
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run winter-water-130
+wandb: ⭐️ View project at https://wandb.ai/epideixx/Chess-Transformer
+wandb: 🚀 View run at https://wandb.ai/epideixx/Chess-Transformer/runs/3gx64pwi
+510
+Epoch 0:   0% 0/510 [00:00<?, ? batch/s]/var/spool/slurm//job1751588/slurm_script: line 8: 230017 Bus error               python3 Ultimate_TTT/training.py -g
+slurmstepd: error: Detected 2 oom-kill event(s) in step 1751588.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
