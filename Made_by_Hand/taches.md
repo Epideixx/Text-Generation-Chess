@@ -27,3 +27,15 @@ Pour DEV (05/04) :
 - Utiliser mask pour contrecarrer padding dans Tokenizer
 - Couches Dropout
 - Training complet sur cluster
+
+
+Pour Parallélisme :
+- Demander Guillaume Joslin (donner contact à José)
+- Possible que la partie BP soit plus courte (GPU) que MCTS (RAM)
+- Tester avec de plus gros trucs sur GPU et voir si en fait c'est pas la partie RAM qui bloque parce que pas parallélisable 
+- Ou alors GRAM sature
+
+
+
+POURQUOI J'ARRIVE PLUS A PARTIR D'UNE HAUTE LOSS ???
+Genre c'est comme si ça s'initialisait toujours au même endroit ...

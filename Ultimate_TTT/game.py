@@ -127,9 +127,6 @@ class TTT(Game):
             Player
         """
         if self.legal_moves[pos[0], pos[1]] == 0:
-            self.show()
-            print(self.legal_moves)
-            print(pos)
             raise Exception("Ilegal move")
         self.board[pos[0], pos[1], color] = 1
 

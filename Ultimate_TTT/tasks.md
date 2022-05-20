@@ -18,9 +18,20 @@ C'est pour ça qu'il y a le "start" et le "stop" pour l'entraînement normalemen
 Et possiblement faudra changer la fonction de coût
 - Transformer fonction de coût pour qu'elle target beaucoup plus le dernier coup que les autres au bout d'un moment d'entraînement ABANDON FOR THE MOMENT
 - Prendre meilleure accuracy DONE
-- Regarder le Embedding "Gradients do not exist"
+- Regarder le Embedding "Gradients do not exist" DONE
+- Installer Cuda DONE
+
+- On va voir s'il y a des segments sur lesquels il apprend mieux
 
 - Et si ça marche, on passe sur la partie analyse du réseau
+
+Projet : Deadline générale = 1 Juin
+- Trouver ce qui marchait avant ==> C'est sans aucun doute le shuffle(32000) !!!!!!!!!!!!!!!!!!
+- Réussir un entraînement
+- Faire apprendre au fur et à mesure des parties de plus en plus hard
+- Mettre en place un interface graphique 
+- Mettre en place un joueur Transformer
+- Obtenir des résultats
 
 NOTES :
 - Ben en fait, faut peut-être lui dire pour qui il joue le coco, parce que du coup il sait pas qui il fait gagner ...

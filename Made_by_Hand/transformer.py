@@ -13,7 +13,7 @@ from embedding import TextEmbedder
 from positional_encoding import PositionalEncoding
 from encoder import Encoder
 from decoder import Decoder
-from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy, ClassicAccuracy
+from metrics import MaskedAccuracy, MaskedSparseCategoricalEntropy, ClassicAccuracy, CustomSchedule
 
 
 from import_data import import_data
@@ -66,7 +66,8 @@ class Transformer(tf.keras.Model):
         self.final = tf.keras.layers.Dense(vocab_moves, activation="softmax")
 
         # For training ==> TO MAKE EVOLVE
-        self.optimizer = tf.keras.optimizers.Adam(beta_1=0.9, beta_2=0.98,
+        learning_rate = CustomSchedule(model_size)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
         self.accuracy = ClassicAccuracy()
         self.loss = MaskedSparseCategoricalEntropy()
@@ -170,7 +171,8 @@ class Transformer(tf.keras.Model):
         train_dataset = tf.data.Dataset.zip((x_train, y_train))
 
 
-        train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
+        train_dataset = train_dataset.shuffle(32000).batch(batch_size=batch_size)
+        print(len(train_dataset))
 
         for epoch in range(num_epochs):
 
@@ -190,6 +192,9 @@ class Transformer(tf.keras.Model):
                         print(file_to_save)
                         filename = os.path.join(file_to_save, "model_weights")
                         self.save_weights(filename)
+
+                if batch == 0:
+                    print(self.summary())
             
 
             # Validation set
