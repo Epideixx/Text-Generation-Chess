@@ -64,4 +64,4 @@ encoder_tokenize.save(encoder_filepath)
 decoder_filepath = os.path.join(folder_to_save, "decoder_tokenizer")
 decoder_tokenize.save(decoder_filepath)
 
-transfo.fit(x=x, y=y, batch_size=16, num_epochs=15, wandb_api=True, file_to_save = folder_to_save, validation_split = 0.0)
+transfo.fit(x=x, y=y, batch_size=16, num_epochs=15, wandb_api=False, file_to_save = folder_to_save, validation_split = 0.0)
