@@ -24,9 +24,9 @@ vocab_board = 10
 model_size = 128
 
 transfo = Transformer(vocab_board = vocab_board, vocab_moves=vocab_moves, model_size = model_size,
-                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=12, dropout=0.1)
+                      length_board=length_board, max_moves_in_game=max_moves_in_game, num_layers=8, dropout=0.1)
 
-filename = os.path.join(os.path.dirname(__file__), "test.txt")
+filename = os.path.join(os.path.dirname(__file__), "fen.txt")
 dataset = import_data(filename=filename)
 
 dataset = list(zip(*dataset))
@@ -53,7 +53,7 @@ y = tf.data.Dataset.from_tensor_slices(tok_output)
 
 
 # Everything to save
-folder_to_save = os.path.join(os.path.dirname(__file__), "Test_nn_17_05_22")
+folder_to_save = os.path.join(os.path.dirname(__file__), "Train_20_05_22")
 if not os.path.exists(folder_to_save):
     os.makedirs(folder_to_save)
 
@@ -64,4 +64,5 @@ encoder_tokenize.save(encoder_filepath)
 decoder_filepath = os.path.join(folder_to_save, "decoder_tokenizer")
 decoder_tokenize.save(decoder_filepath)
 
-transfo.fit(x=x, y=y, batch_size=16, num_epochs=15, wandb_api=True, file_to_save = folder_to_save, validation_split = 0.0)
+
+transfo.fit(x=x, y=y, batch_size=2048, num_epochs=15, wandb_api=True, file_to_save = folder_to_save, validation_split = 0.0)
