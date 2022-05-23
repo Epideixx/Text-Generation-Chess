@@ -56,7 +56,7 @@ class DecoderBlock(tf.keras.Model):
         self.dropoutlayer = tf.keras.layers.Dropout(rate=dropout)
         self.ffn_norm = tf.keras.layers.BatchNormalization()
 
-    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, padding_mask_enc_dec: tf.Tensor = None, training: bool = False):
+    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, look_ahead_mask: tf.Tensor = None, training: bool = False):
         """
         Feed-forward through the Decoder block
         Parameters
@@ -67,8 +67,6 @@ class DecoderBlock(tf.keras.Model):
             Output of the Encoder block
         padding_mask : None or tf.Tensor, shape = (batch_size, vocab_size, vocab_size) TO CONFIRM
             Mask to apply on the data in the first multi-attention head
-        padding_mask_enc_dec : None or tf.Tensor, shape = (???)
-            Mask to apply on the data in the second multi-attention head
         training : bool, default = False
             True if model is training
 
@@ -83,8 +81,8 @@ class DecoderBlock(tf.keras.Model):
         """
 
         input_norm = self.input_norm(input)
-        masked_mha_output, masked_attention_block = self.attention(
-            input_norm, input_norm, input_norm, padding_mask)
+        masked_mha_output, masked_attention_block = self.masked_attention(
+            input_norm, input_norm, input_norm, look_ahead_mask)
         masked_mha_output = self.dropoutlayer(
             masked_mha_output, training=training)
         add_1 = input + masked_mha_output  # Residual connection
@@ -92,8 +90,8 @@ class DecoderBlock(tf.keras.Model):
 
         Q_mha = add_norm_1
 
-        mha_output, attention_block = self.masked_attention(
-            Q_mha, encoder_output, encoder_output, padding_mask_enc_dec)
+        mha_output, attention_block = self.attention(
+            Q_mha, encoder_output, encoder_output, padding_mask)
         mha_output = self.dropoutlayer(mha_output, training=training)
         add_2 = add_1 + mha_output  # Residual connection
         add_norm_2 = self.attention_norm(add_2)  # Normalization
@@ -140,7 +138,7 @@ class Decoder(tf.keras.Model):
         self.decoder_blocks = [DecoderBlock(
             vocab_size, model_size, h) for _ in range(num_decoder)]
 
-    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, training: bool = False):
+    def call(self, input: tf.Tensor, encoder_output: tf.Tensor, padding_mask: tf.Tensor = None, look_ahead_mask: tf.Tensor = None, training: bool = False):
         """
         Pass throught the Decoder
 
@@ -152,8 +150,6 @@ class Decoder(tf.keras.Model):
             Output of the Encoder block
         padding_mask : None or tf.Tensor, shape = (batch_size, vocab_size, vocab_size) TO CONFIRM
             Mask to apply on the data in the first multi-attention head of each Decoder block
-        padding_mask_enc_dec : None or tf.Tensor, shape = (???)
-            Mask to apply on the data in the second multi-attention head of each Decoder block
         training : bool, default = False
             True if model is training
 
@@ -173,7 +169,7 @@ class Decoder(tf.keras.Model):
 
         for i in range(self.num_decoder):
             output, masked_attention, attention = self.decoder_blocks[i](
-                output, encoder_output, padding_mask, training=training)
+                output, encoder_output, padding_mask = padding_mask, training=training, look_ahead_mask = look_ahead_mask)
             masked_attentions.append(masked_attention)
             attentions.append(attention)
 
