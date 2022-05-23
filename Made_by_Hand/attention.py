@@ -103,7 +103,7 @@ class MultiHeadAttention(tf.keras.Model):
 
         # Concatenate all the attention heads
         # so that the last dimension summed up to model_size
-        heads_output = tf.concat(heads_output, axis=2)
+        heads_output = tf.concat(heads_output, axis=-1) # C'est lààààààààààààààààà que ça chibre !!!!
 
         attention = tf.stack(heads_attention)
         output = self.wo(heads_output)

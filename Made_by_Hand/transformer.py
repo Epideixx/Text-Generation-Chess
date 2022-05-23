@@ -91,23 +91,32 @@ class Transformer(tf.keras.Model):
         # print("Test 1 : ", self.encoder_embedding.trainable_variables)
         pes_encoder = self.encoder_PE()
         in_encoder = emb_encoder + pes_encoder
-        mask_encoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
-            input_encoder, 0)), tf.float32), -1)
-        mask_encoder = tf.matmul(
-            mask_encoder, mask_encoder, transpose_b=True)  # To solve padding
+
+        # mask_encoder_padding = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
+        #     input_encoder, 0)), tf.float32), -1)
+        # mask_encoder_padding = tf.matmul(
+        #     mask_encoder_padding, mask_encoder_padding, transpose_b=True)  # To solve padding
+
+        mask_encoder_padding = tf.cast(tf.minimum(input_encoder, 1), tf.int32)
+        mask_encoder_padding = mask_encoder_padding[..., tf.newaxis, tf.newaxis, :]
+
         output_encoder, attention_encoder = self.encoder(
-            in_encoder, padding_mask=mask_encoder, training=training)
+            in_encoder, padding_mask=mask_encoder_padding, training=training)
 
         tok_decoder = input_decoder
         emb_decoder = self.decoder_embedding(tok_decoder)
         pes_decoder = self.decoder_PE()
         in_decoder = emb_decoder + pes_decoder
-        mask_decoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
-            input_decoder, 0)), tf.float32), -1)
-        mask_decoder = tf.matmul(
-            mask_decoder, mask_decoder, transpose_b=True)  # To solve padding
+        # mask_decoder_padding = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
+        #     input_decoder, 0)), tf.float32), -1)
+        # mask_decoder_padding = tf.matmul(
+        #     mask_decoder_padding, mask_decoder_padding, transpose_b=True)  # To solve padding
+
+        mask_decoder_padding = tf.cast(tf.minimum(input_decoder, 1), tf.int32)
+        mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, tf.newaxis, :]
+
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
-            in_decoder, output_encoder, padding_mask=mask_decoder, training=training)
+            in_decoder, output_encoder, padding_mask=mask_decoder_padding, training=training)
 
         output = self.final(output_decoder)
 
@@ -234,17 +243,17 @@ if __name__ == '__main__':
 
     # ---- Test 2 ----
     length_board = 64
-    max_moves_in_game = 300
+    max_moves_in_game = 200
     vocab_moves = 64*(7*4 + 8)
 
-    transfo = Transformer(vocab_moves=vocab_moves,
-                          length_board=length_board, num_layers=4)
+    transfo = Transformer(vocab_moves=vocab_moves, max_moves_in_game= max_moves_in_game,
+                          length_board=length_board, num_layers=2, h = 5)
 
     dataset = import_data(filename="test.txt")
 
-    data = dataset[:45]
-    enc_input = [x[0] for x in dataset[:45]]
-    dec_input = [x[2] for x in dataset[:45]]
+    data = dataset[:10]
+    enc_input = [x[0] for x in dataset[:10]]
+    dec_input = [x[2] for x in dataset[:10]]
 
     encoder_tokenize = ChessTokenizer()
     decoder_tokenize = ChessTokenizer()
