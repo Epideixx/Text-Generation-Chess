@@ -7,6 +7,7 @@ import numpy as np
 import wandb
 import os
 from tqdm import tqdm
+import time
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -142,14 +143,28 @@ class Transformer(tf.keras.Model):
         with tf.GradientTape() as tape:
 
             input = encoder_inputs, decoder_inputs
+
+            t = time.time() # Prend du temps
             transfo_predict_outputs = self(input=input, training=True)
+
+            print("Time for one prediction : ", time.time() - t)
+            
+            # Pas cette partie qui prend du temps
+            t = time.time()
             loss = self.loss(transfo_real_outputs,
                              transfo_predict_outputs)
+            print("Time for one loss calculation : ", time.time() - t)
 
-
+        t = time.time() # Prend du temps
         gradients = tape.gradient(loss, self.trainable_variables)
+        print("Time for one gradient : ", time.time() - t)
+
+        t = time.time() # Prend pas trop de temps
         self.optimizer.apply_gradients(
             zip(gradients, self.trainable_variables))
+        print("Time for one optimizer : ", time.time() - t)
+       
+
         accuracy = self.accuracy(
             transfo_real_outputs, transfo_predict_outputs)
 
@@ -180,10 +195,8 @@ class Transformer(tf.keras.Model):
 
             for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
                 
-                # emb_weights = self.encoder_embedding.get_weights()
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
-                # print([self.encoder_embedding.get_weights()[i] - emb_weights[i] for i in range(len(emb_weights))])
                 if wandb_api:
                     wandb.log({"train_loss": loss, "train_accuracy": accuracy})
 
@@ -197,7 +210,7 @@ class Transformer(tf.keras.Model):
 
                 if batch == 0:
                     print(self.summary())
-            
+                            
 
             # Validation set
             if validation_split :

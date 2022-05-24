@@ -21,8 +21,8 @@ def import_data(filename="fen.txt", batchsize=32):
             if line:
                 board_move = [string.strip() for string in line.split('-')]
                 boards.append('S' + board_move[0])
-                moves_to_play.append(board_move[2] + ' ' + board_move[1])
-                mem_moves.append('<Start>' + board_move[2])
+                moves_to_play.append(board_move[2] + ' ' + board_move[1] + ' <end>')
+                mem_moves.append('<Start>' + board_move[2] + ' ' + board_move[1])
 
     dataset = list(zip(boards, moves_to_play, mem_moves))
 
