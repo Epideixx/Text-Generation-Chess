@@ -91,7 +91,7 @@ class MultiHeadAttention(tf.keras.Model):
                 mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
                 # set logits to -inf where mask=0 to ignore them
                 # during packpropagation
-                attention += (1.0 - mask) * -1e9 # Problem mask for 2nd mha decoder
+                attention += (1.0 - mask) * -1e9 
 
             attention_head = tf.nn.softmax(attention, axis=-1)
             # alignment has shape (batch, query_len, key_len)
@@ -103,8 +103,8 @@ class MultiHeadAttention(tf.keras.Model):
 
         # Concatenate all the attention heads
         # so that the last dimension summed up to model_size
-        heads_output = tf.concat(heads_output, axis=-1) # C'est lààààààààààààààààà que ça chibre !!!!
-
+        heads_output = tf.concat(heads_output, axis=-1) 
+        
         attention = tf.stack(heads_attention)
         output = self.wo(heads_output)
 

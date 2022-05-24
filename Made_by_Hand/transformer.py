@@ -69,7 +69,7 @@ class Transformer(tf.keras.Model):
         learning_rate = CustomSchedule(model_size)
         self.optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98,
                                                   epsilon=1e-9)
-        self.accuracy = ClassicAccuracy()
+        self.accuracy = MaskedAccuracy()
         self.loss = MaskedSparseCategoricalEntropy()
 
     def call(self, input, training: bool = False):
@@ -92,7 +92,7 @@ class Transformer(tf.keras.Model):
 
 
         mask_padding = tf.cast(tf.minimum(input_encoder, 1), tf.int32)
-        mask_padding = mask_padding[..., tf.newaxis, tf.newaxis, :]
+        mask_padding = mask_padding[..., tf.newaxis, :]
 
         output_encoder, attention_encoder = self.encoder(
             in_encoder, padding_mask=mask_padding, training=training)
@@ -103,11 +103,10 @@ class Transformer(tf.keras.Model):
         in_decoder = emb_decoder + pes_decoder
 
         mask_decoder_padding = tf.cast(tf.minimum(input_decoder, 1), tf.float32)
-        mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, tf.newaxis, :]
+        mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, :]
         size = tok_decoder.shape[-1]
         look_ahead_mask = tf.linalg.band_part(tf.ones((size, size)), -1, 0)
         look_ahead_mask = tf.maximum(mask_decoder_padding, look_ahead_mask)
-        print(look_ahead_mask)
 
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=mask_padding, training=training, look_ahead_mask = look_ahead_mask)

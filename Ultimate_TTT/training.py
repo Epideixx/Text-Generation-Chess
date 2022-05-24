@@ -53,7 +53,7 @@ y = tf.data.Dataset.from_tensor_slices(tok_output)
 
 
 # Everything to save
-folder_to_save = os.path.join(os.path.dirname(__file__), "Train_20_05_22")
+folder_to_save = os.path.join(os.path.dirname(__file__), "Train_23_05_22")
 if not os.path.exists(folder_to_save):
     os.makedirs(folder_to_save)
 
@@ -64,5 +64,5 @@ encoder_tokenize.save(encoder_filepath)
 decoder_filepath = os.path.join(folder_to_save, "decoder_tokenizer")
 decoder_tokenize.save(decoder_filepath)
 
-transfo.fit(x=x, y=y, batch_size=2048, num_epochs=15, wandb_api=True, file_to_save = folder_to_save, validation_split = 0.0)
+transfo.fit(x=x, y=y, batch_size=8, num_epochs=20, wandb_api=True, file_to_save = folder_to_save, validation_split = 0.0)
 
