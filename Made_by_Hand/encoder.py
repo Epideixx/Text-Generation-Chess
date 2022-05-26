@@ -69,9 +69,7 @@ class EncoderBlock(tf.keras.Model):
             input_norm, input_norm, input_norm, padding_mask)
         mha_output = self.dropoutlayer(mha_output, training=training)
         add_1 = input + mha_output  # Residual connection
-        add_norm_1 = self.attention_norm(add_1)  # Normalization
-
-        ffn_in = add_norm_1
+        ffn_in = self.attention_norm(add_1)  # Normalization
 
         ffn_out = self.dense_1(ffn_in)
         ffn_out = self.dropoutlayer(ffn_out, training=training)

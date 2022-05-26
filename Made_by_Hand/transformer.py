@@ -48,6 +48,7 @@ class Transformer(tf.keras.Model):
 
         self.encoder_embedding = TextEmbedder(
             vocab_size=vocab_board, depth_emb=model_size)
+
         self.encoder_PE = PositionalEncoding(
             seq_length=length_board, depth=model_size)
         self.encoder = Encoder(
@@ -87,23 +88,27 @@ class Transformer(tf.keras.Model):
         emb_encoder = self.encoder_embedding(tok_encoder)
         pes_encoder = self.encoder_PE()
         in_encoder = emb_encoder + pes_encoder
-        mask_encoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
-            input_encoder, 0)), tf.float32), -1)
-        mask_encoder = tf.matmul(
-            mask_encoder, mask_encoder, transpose_b=True)  # To solve padding
+
+
+        mask_padding = tf.cast(tf.minimum(input_encoder, 1), tf.int32)
+        mask_padding = mask_padding[..., tf.newaxis, :]
+
         output_encoder, attention_encoder = self.encoder(
-            in_encoder, padding_mask=mask_encoder, training=training)
+            in_encoder, padding_mask=mask_padding, training=training)
 
         tok_decoder = input_decoder
         emb_decoder = self.decoder_embedding(tok_decoder)
         pes_decoder = self.decoder_PE()
         in_decoder = emb_decoder + pes_decoder
-        mask_decoder = tf.expand_dims(tf.cast(tf.math.logical_not(tf.math.equal(
-            input_decoder, 0)), tf.float32), -1)
-        mask_decoder = tf.matmul(
-            mask_decoder, mask_decoder, transpose_b=True)  # To solve padding
+
+        mask_decoder_padding = tf.cast(tf.minimum(input_decoder, 1), tf.float32)
+        mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, :]
+        size = tok_decoder.shape[-1]
+        look_ahead_mask = tf.linalg.band_part(tf.ones((size, size)), -1, 0)
+        look_ahead_mask = tf.maximum(mask_decoder_padding, look_ahead_mask)
+
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
-            in_decoder, output_encoder, padding_mask=mask_decoder, training=training)
+            in_decoder, output_encoder, padding_mask=mask_padding, training=training, look_ahead_mask = look_ahead_mask)
 
         output = self.final(output_decoder)
 
@@ -136,13 +141,19 @@ class Transformer(tf.keras.Model):
         with tf.GradientTape() as tape:
 
             input = encoder_inputs, decoder_inputs
+
             transfo_predict_outputs = self(input=input, training=True)
+
+            
             loss = self.loss(transfo_real_outputs,
-                             transfo_predict_outputs, sample_weight = None)
+                             transfo_predict_outputs)
 
         gradients = tape.gradient(loss, self.trainable_variables)
+
         self.optimizer.apply_gradients(
             zip(gradients, self.trainable_variables))
+       
+
         accuracy = self.accuracy(
             transfo_real_outputs, transfo_predict_outputs)
 
@@ -172,7 +183,7 @@ class Transformer(tf.keras.Model):
         for epoch in range(num_epochs):
 
             for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in tqdm(enumerate(train_dataset), desc="Epoch " + str(epoch), unit=" batch", mininterval=1, total = len(train_dataset)):
-
+                
                 loss, accuracy = self.train_step(
                     encoder_inputs, transfo_real_outputs, decoder_inputs)
                 if wandb_api:
@@ -185,7 +196,10 @@ class Transformer(tf.keras.Model):
                         print(file_to_save)
                         filename = os.path.join(file_to_save, "model_weights")
                         self.save_weights(filename)
-            
+
+                if batch == 0:
+                    print(self.summary())
+                            
 
             # Validation set
             if validation_split :
@@ -228,17 +242,17 @@ if __name__ == '__main__':
 
     # ---- Test 2 ----
     length_board = 64
-    max_moves_in_game = 300
+    max_moves_in_game = 200
     vocab_moves = 64*(7*4 + 8)
 
-    transfo = Transformer(vocab_moves=vocab_moves,
-                          length_board=length_board, num_layers=4)
+    transfo = Transformer(vocab_moves=vocab_moves, max_moves_in_game= max_moves_in_game,
+                          length_board=length_board, num_layers=2, h = 5)
 
     dataset = import_data(filename="test.txt")
 
-    data = dataset[:45]
-    enc_input = [x[0] for x in dataset[:45]]
-    dec_input = [x[2] for x in dataset[:45]]
+    data = dataset[:10]
+    enc_input = [x[0] for x in dataset[:10]]
+    dec_input = [x[2] for x in dataset[:10]]
 
     encoder_tokenize = ChessTokenizer()
     decoder_tokenize = ChessTokenizer()
