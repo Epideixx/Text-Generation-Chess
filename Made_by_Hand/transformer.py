@@ -85,18 +85,23 @@ class Transformer(tf.keras.Model):
         output : tf.Tensor
             TO COMPLETE
         """
+
         input_encoder, input_decoder = input
         tok_encoder = input_encoder
         emb_encoder = self.encoder_embedding(tok_encoder)
+
         pes_encoder = self.encoder_PE()
         in_encoder = emb_encoder + pes_encoder
 
 
         mask_padding = tf.cast(tf.minimum(input_encoder, 1), tf.int32)
         mask_padding = mask_padding[..., tf.newaxis, :]
-
+        
+        t = time.time()
         output_encoder, attention_encoder = self.encoder(
             in_encoder, padding_mask=mask_padding, training=training)
+
+        print("Time through encoder : ", time.time() - t)
 
         tok_decoder = input_decoder
         emb_decoder = self.decoder_embedding(tok_decoder)
@@ -111,6 +116,7 @@ class Transformer(tf.keras.Model):
 
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=mask_padding, training=training, look_ahead_mask = look_ahead_mask)
+
 
         output = self.final(output_decoder)
 
@@ -173,7 +179,12 @@ class Transformer(tf.keras.Model):
     def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, validation_split = 0.0, wandb_api=True, file_to_save = None):
 
         if wandb_api:
-            wandb.init(project="Chess-Transformer", entity="epideixx")
+            config = {
+                "batch_size":batch_size,
+                "epochs":num_epochs,
+                "dropout":self.dropout
+            }
+            wandb.init(project="Chess-Transformer", entity="epideixx", config=config)
         
         if validation_split:
             train_size = int((1-validation_split) * len(x))
@@ -188,8 +199,7 @@ class Transformer(tf.keras.Model):
         train_dataset = tf.data.Dataset.zip((x_train, y_train))
 
 
-        train_dataset = train_dataset.shuffle(32000).batch(batch_size=batch_size)
-        print(len(train_dataset))
+        train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
 
         for epoch in range(num_epochs):
 

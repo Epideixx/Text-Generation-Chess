@@ -2,6 +2,7 @@
 wandb
 /test_transfo
 .vscode
+slurm*
 
 
 # Byte-compiled / optimized / DLL files

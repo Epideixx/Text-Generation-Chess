@@ -5,6 +5,7 @@
 import numpy as np
 import tensorflow as tf
 import os
+import time
 
 from attention import MultiHeadAttention
 
@@ -64,13 +65,20 @@ class EncoderBlock(tf.keras.Model):
         -------
         TO COMPLETE
         """
+        global t_mha
         input_norm = self.input_norm(input)
+
+        t = time.time()
         mha_output, attention_block = self.attention(
             input_norm, input_norm, input_norm, padding_mask)
+        t_mha += time.time() - t
+
         mha_output = self.dropoutlayer(mha_output, training=training)
         add_1 = input + mha_output  # Residual connection
         ffn_in = self.attention_norm(add_1)  # Normalization
+        
 
+        t_ffn = time.time()
         ffn_out = self.dense_1(ffn_in)
         ffn_out = self.dropoutlayer(ffn_out, training=training)
         ffn_out = self.dense_2(ffn_out)
@@ -78,6 +86,7 @@ class EncoderBlock(tf.keras.Model):
         ffn_out = add_1 + ffn_out
         ffn_out = self.ffn_norm(ffn_out)
 
+        print("Time through FF NN encoder : ", time.time() - t_ffn)
         block_output = ffn_out
 
         return block_output, attention_block
@@ -102,6 +111,7 @@ class Encoder(tf.keras.Model):
         dropout : float, default = 0.0
             Rate of dropout
         """
+
         super(Encoder, self).__init__()
         self.vocab_size = vocab_size
         self.model_size = model_size
@@ -128,6 +138,9 @@ class Encoder(tf.keras.Model):
         TO COMPLETE
         """
 
+        global t_mha
+        t_mha = 0
+
         output = input
         attentions = []
 
@@ -136,6 +149,7 @@ class Encoder(tf.keras.Model):
                 output, padding_mask, training)
             attentions.append(attention)
 
+        print("Time through attention Encoder :", t_mha)
         attention = tf.concat(attentions, axis=-1)
 
         return output, attention
