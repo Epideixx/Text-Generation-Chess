@@ -113,9 +113,12 @@ class Transformer(tf.keras.Model):
         size = tok_decoder.shape[-1]
         look_ahead_mask = tf.linalg.band_part(tf.ones((size, size)), -1, 0)
         look_ahead_mask = tf.maximum(mask_decoder_padding, look_ahead_mask)
+        
+        t = time.time()
 
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=mask_padding, training=training, look_ahead_mask = look_ahead_mask)
+        print("Time through decoder : ", time.time() - t)
 
 
         output = self.final(output_decoder)
@@ -155,11 +158,8 @@ class Transformer(tf.keras.Model):
 
             print("Time for one prediction : ", time.time() - t)
             
-            # Pas cette partie qui prend du temps
-            t = time.time()
             loss = self.loss(transfo_real_outputs,
                              transfo_predict_outputs)
-            print("Time for one loss calculation : ", time.time() - t)
 
         t = time.time() # Prend du temps
         gradients = tape.gradient(loss, self.trainable_variables)

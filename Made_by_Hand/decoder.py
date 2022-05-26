@@ -5,6 +5,7 @@
 import numpy as np
 import tensorflow as tf
 import os
+import time
 
 from attention import MultiHeadAttention
 
@@ -80,9 +81,13 @@ class DecoderBlock(tf.keras.Model):
             Attention from the first multi-head attention
         """
 
+        global t_mha, t_matmul_deco
+
         input_norm = self.input_norm(input)
-        masked_mha_output, masked_attention_block = self.masked_attention(
-            input_norm, input_norm, input_norm, look_ahead_mask)
+        t = time.time()
+        masked_mha_output, masked_attention_block, t_matmul_deco = self.masked_attention(
+            input_norm, input_norm, input_norm, look_ahead_mask, t_matmul_deco)
+        t_mha +=  time.time() - t
         masked_mha_output = self.dropoutlayer(
             masked_mha_output, training=training)
         add_1 = input + masked_mha_output  # Residual connection
@@ -90,8 +95,10 @@ class DecoderBlock(tf.keras.Model):
 
         Q_mha = add_norm_1
 
-        mha_output, attention_block = self.attention(
-            Q_mha, encoder_output, encoder_output, padding_mask)
+        t = time.time()
+        mha_output, attention_block, t_matmul_deco = self.attention(
+            Q_mha, encoder_output, encoder_output, padding_mask, t_matmul_deco)
+        t_mha +=  time.time() - t
         mha_output = self.dropoutlayer(mha_output, training=training)
         add_2 = add_1 + mha_output  # Residual connection
         add_norm_2 = self.attention_norm(add_2)  # Normalization
@@ -162,6 +169,9 @@ class Decoder(tf.keras.Model):
         attention : tf.Tensor, sahpe = (???)
             Attention from the first multi-head attention of each Decoder block
         """
+        global t_mha, t_matmul_deco
+        t_mha = 0
+        t_matmul_deco = 0
 
         output = input
         masked_attentions = []
@@ -176,6 +186,8 @@ class Decoder(tf.keras.Model):
         masked_attention = tf.concat(masked_attentions, axis=-1)
         attention = tf.concat(attentions, axis=-1)
 
+        print("Time through attention Decoder :", t_mha)
+        print("Time through attention Decoder matmul:", t_matmul_deco)
         return output, masked_attention, attention
 
 

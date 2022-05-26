@@ -38,7 +38,7 @@ class MultiHeadAttention(tf.keras.Model):
         # Final processing of the concatenated data
         self.wo = tf.keras.layers.Dense(model_size)
 
-    def call(self, Q: tf.Tensor, K: tf.Tensor, V: tf.Tensor, mask: tf.Tensor = None):
+    def call(self, Q: tf.Tensor, K: tf.Tensor, V: tf.Tensor, mask: tf.Tensor = None, t_matmul = 0):
         """
         Apply the Multi-Head Attention algorithm
 
@@ -76,22 +76,20 @@ class MultiHeadAttention(tf.keras.Model):
         heads_attention = []
 
         # For each head we apply the Scaled Dot-Product Attention described in the original paper
-        t_matmul = 0
-        t_mask = 0
+        
         t_output_head = 0
         for i in range(self.h):
 
             t = time.time()
             attention = tf.matmul(self.wq[i](Q),
                                   self.wk[i](K), transpose_b=True)
-            t_matmul += time.time() - t
+            t_matmul = t_matmul + (time.time() - t)
 
             # Here we scale the score as described in the paper
             attention /= tf.math.sqrt(tf.dtypes.cast(self.key_size, tf.float32))
             # attention has shape (batch, query_len, key_len)
 
             # mask must be broadcastable to (..., query_len, value_len)
-            t = time.time()
             if mask is not None:
 
                 # cast mask to binary tensor (0.0 or 1.0)
@@ -100,35 +98,31 @@ class MultiHeadAttention(tf.keras.Model):
                 # during packpropagation
                 attention += (1.0 - mask) * -1e9 
             
-            t_mask += time.time() - t
 
             attention_head = tf.nn.softmax(attention, axis=-1)
             # alignment has shape (batch, query_len, key_len)
 
             t = time.time()
             output_head = attention_head @ self.wv[i](V)
-            t_output_head += time.time() - t
+            t_matmul += time.time() - t
             # head has shape (batch, decoder_len, value_size)
             heads_output.append(output_head)
             heads_attention.append(attention_head)
 
-        print("Time through matmul MHA : ", t_matmul)
-        print("Time through mask MHA : ", t_mask)
-        print("Time through final mul MHA : ", t_output_head)
+        # print("Time through matmul MHA : ", t_matmul)
+        # print("Time through final mul MHA : ", t_output_head)
         
 
         # Concatenate all the attention heads
         # so that the last dimension summed up to model_size
-        t = time.time()
         heads_output = tf.concat(heads_output, axis=-1) 
-        print("Time through concat MHA : ", time.time() - t)
 
         
         attention = tf.stack(heads_attention)
         output = self.wo(heads_output)
 
         # output has shape (batch, len_Q, model_size)
-        return output, attention
+        return output, attention, t_matmul
 
 
 # Tests

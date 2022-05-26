@@ -65,12 +65,12 @@ class EncoderBlock(tf.keras.Model):
         -------
         TO COMPLETE
         """
-        global t_mha
+        global t_mha, t_matmul
         input_norm = self.input_norm(input)
 
         t = time.time()
-        mha_output, attention_block = self.attention(
-            input_norm, input_norm, input_norm, padding_mask)
+        mha_output, attention_block, t_matmul = self.attention(
+            input_norm, input_norm, input_norm, padding_mask, t_matmul)
         t_mha += time.time() - t
 
         mha_output = self.dropoutlayer(mha_output, training=training)
@@ -78,7 +78,6 @@ class EncoderBlock(tf.keras.Model):
         ffn_in = self.attention_norm(add_1)  # Normalization
         
 
-        t_ffn = time.time()
         ffn_out = self.dense_1(ffn_in)
         ffn_out = self.dropoutlayer(ffn_out, training=training)
         ffn_out = self.dense_2(ffn_out)
@@ -86,7 +85,6 @@ class EncoderBlock(tf.keras.Model):
         ffn_out = add_1 + ffn_out
         ffn_out = self.ffn_norm(ffn_out)
 
-        print("Time through FF NN encoder : ", time.time() - t_ffn)
         block_output = ffn_out
 
         return block_output, attention_block
@@ -138,8 +136,9 @@ class Encoder(tf.keras.Model):
         TO COMPLETE
         """
 
-        global t_mha
+        global t_mha, t_matmul
         t_mha = 0
+        t_matmul = 0
 
         output = input
         attentions = []
@@ -150,6 +149,7 @@ class Encoder(tf.keras.Model):
             attentions.append(attention)
 
         print("Time through attention Encoder :", t_mha)
+        print("Time through attention Encoder matmul:", t_matmul)
         attention = tf.concat(attentions, axis=-1)
 
         return output, attention
