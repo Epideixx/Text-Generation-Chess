@@ -53,7 +53,7 @@ y = tf.data.Dataset.from_tensor_slices(tok_output)
 
 
 # Everything to save
-folder_to_save = os.path.join(os.path.dirname(__file__), "Tests_26_05")
+folder_to_save = os.path.join(os.path.dirname(__file__), "Test_26_05_12h15")
 if not os.path.exists(folder_to_save):
     os.makedirs(folder_to_save)
 

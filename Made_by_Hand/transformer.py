@@ -106,7 +106,7 @@ class Transformer(tf.keras.Model):
         mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, tf.newaxis, :]
         size = tok_decoder.shape[-1]
         look_ahead_mask = tf.linalg.band_part(tf.ones((size, size)), -1, 0)
-        look_ahead_mask = tf.maximum(mask_decoder_padding, look_ahead_mask)
+        look_ahead_mask = tf.minimum(mask_decoder_padding, look_ahead_mask)
 
         output_decoder, masked_attention_decoder, attention_decoder = self.decoder(
             in_decoder, output_encoder, padding_mask=mask_padding, training=training, look_ahead_mask = look_ahead_mask)
@@ -201,11 +201,10 @@ class Transformer(tf.keras.Model):
                     if batch % 200 == 0: # To edit
                         if not os.path.exists(file_to_save):
                             os.makedirs(file_to_save)
-                        print(file_to_save)
                         filename = os.path.join(file_to_save, "model_weights")
                         self.save_weights(filename)
 
-                if batch == 0:
+                if epoch == 0 and batch == 0:
                     print(self.summary())
                             
 
