@@ -3,6 +3,7 @@ wandb
 /test_transfo
 .vscode
 slurm*
+test.py
 
 
 # Byte-compiled / optimized / DLL files
