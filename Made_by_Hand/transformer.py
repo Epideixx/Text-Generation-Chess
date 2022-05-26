@@ -217,6 +217,10 @@ class Transformer(tf.keras.Model):
 
 
 
+            filename = os.path.join(os.path.dirname(
+                __file__), "Transformer", "save_transfo")
+            self.save_weights(filename)
+
 
 # Test
 if __name__ == '__main__':
