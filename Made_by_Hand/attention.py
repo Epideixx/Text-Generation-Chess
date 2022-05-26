@@ -8,6 +8,32 @@ from embedding import TextEmbedder
 from tokenizer import ChessTokenizer
 from import_data import import_data
 
+def scaled_dot_product(Q: tf.Tensor, K: tf.Tensor, V: tf.Tensor, mask: tf.Tensor = None):
+        
+        attention = tf.matmul(Q,
+                                K, transpose_b=True)
+
+        # Here we scale the score as described in the paper
+        key_size = tf.cast(tf.shape(K)[-1], tf.float32)
+        attention /= tf.math.sqrt(tf.dtypes.cast(key_size, tf.float32))
+        # attention has shape (batch, query_len, key_len)
+
+        # mask must be broadcastable to (..., query_len, value_len)
+        if mask is not None:
+
+            # cast mask to binary tensor (0.0 or 1.0)
+            mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
+            # set logits to -inf where mask=0 to ignore them
+            # during packpropagation
+            attention += (1.0 - mask) * -1e9 
+
+        attention = tf.nn.softmax(attention, axis=-1)
+        # alignment has shape (batch, query_len, key_len)
+
+        output = attention @ V
+
+        return output, attention
+
 
 class MultiHeadAttention(tf.keras.Model):
 
@@ -23,19 +49,26 @@ class MultiHeadAttention(tf.keras.Model):
         """
 
         super(MultiHeadAttention, self).__init__()
-        self.query_size = model_size // h  # Share on different heads
-        self.key_size = model_size // h
-        self.value_size = model_size // h
 
+        self.model_size = model_size
         self.h = h  # Number of heads
+        self.depth = model_size //h
 
-        self.wq = [tf.keras.layers.Dense(self.query_size)
-                   for _ in range(h)]  # Linear layers
-        self.wk = [tf.keras.layers.Dense(self.key_size) for _ in range(h)]
-        self.wv = [tf.keras.layers.Dense(self.value_size) for _ in range(h)]
+        # Linear layers
+        self.wq = tf.keras.layers.Dense(model_size)
+        self.wk = tf.keras.layers.Dense(model_size)
+        self.wv = tf.keras.layers.Dense(model_size)
 
         # Final processing of the concatenated data
         self.wo = tf.keras.layers.Dense(model_size)
+    
+    def split_heads(self, x, batch_size):
+        """Split the last dimension into (num_heads, depth).
+        Transpose the result such that the shape is (batch_size, num_heads, seq_len, depth)
+        """
+        x = tf.reshape(x, (batch_size, -1, self.h, self.depth))
+        return tf.transpose(x, perm=[0, 2, 1, 3])
+
 
     def call(self, Q: tf.Tensor, K: tf.Tensor, V: tf.Tensor, mask: tf.Tensor = None):
         """
@@ -71,44 +104,29 @@ class MultiHeadAttention(tf.keras.Model):
                              f"found {K.get_shape()[-2]} and "
                              f"{V.get_shape()[-2]}.")
 
-        heads_output = []
-        heads_attention = []
+        batch_size = tf.shape(Q)[0]
+
+        Q = self.wq(Q)  # (batch_size, seq_len, model_size)
+        K = self.wk(K)  # (batch_size, seq_len, model_size)
+        V = self.wv(V)  # (batch_size, seq_len, model_size)
 
         # For each head we apply the Scaled Dot-Product Attention described in the original paper
-        for i in range(self.h):
-            attention = tf.matmul(self.wq[i](Q),
-                                  self.wk[i](K), transpose_b=True)
-
-            # Here we scale the score as described in the paper
-            attention /= tf.math.sqrt(tf.dtypes.cast(self.key_size, tf.float32))
-            # attention has shape (batch, query_len, key_len)
-
-            # mask must be broadcastable to (..., query_len, value_len)
-            if mask is not None:
-
-                # cast mask to binary tensor (0.0 or 1.0)
-                mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
-                # set logits to -inf where mask=0 to ignore them
-                # during packpropagation
-                attention += (1.0 - mask) * -1e9 
-
-            attention_head = tf.nn.softmax(attention, axis=-1)
-            # alignment has shape (batch, query_len, key_len)
-
-            output_head = attention_head @ self.wv[i](V)
-            # head has shape (batch, decoder_len, value_size)
-            heads_output.append(output_head)
-            heads_attention.append(attention_head)
-
+        Q = self.split_heads(Q, batch_size)  # (batch_size, num_heads, seq_len_q, depth)
+        K = self.split_heads(K, batch_size)  # (batch_size, num_heads, seq_len_k, depth)
+        V = self.split_heads(V, batch_size)  # (batch_size, num_heads, seq_len_v, depth)
+        
+        scaled_attention, attention_weights = scaled_dot_product(Q = Q, K = K, V = V, mask = mask)
+        
         # Concatenate all the attention heads
         # so that the last dimension summed up to model_size
-        heads_output = tf.concat(heads_output, axis=-1) 
+        scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])  # (batch_size, seq_len_q, num_heads, depth)
+        concat_attention = tf.reshape(scaled_attention,
+                                  (batch_size, -1, self.model_size))  # (batch_size, seq_len_q, model_size)
         
-        attention = tf.stack(heads_attention)
-        output = self.wo(heads_output)
+        output = self.wo(concat_attention)
 
         # output has shape (batch, len_Q, model_size)
-        return output, attention
+        return output, attention_weights
 
 
 # Tests
@@ -142,7 +160,6 @@ if __name__ == '__main__':
     print(output[0])
     print(attention[0])
 
-    print(embedder.summary())
-    print(multi_attention.summary())
+    multi_attention.summary()
 
     print('ok')

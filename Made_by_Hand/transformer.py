@@ -45,6 +45,7 @@ class Transformer(tf.keras.Model):
         self.max_moves_in_game = max_moves_in_game
         self.length_board = length_board
         self.dropout = dropout
+        self.model_size = model_size
 
         self.encoder_embedding = TextEmbedder(
             vocab_size=vocab_board, depth_emb=model_size)
@@ -91,7 +92,7 @@ class Transformer(tf.keras.Model):
 
 
         mask_padding = tf.cast(tf.minimum(input_encoder, 1), tf.int32)
-        mask_padding = mask_padding[..., tf.newaxis, :]
+        mask_padding = mask_padding[..., tf.newaxis, tf.newaxis, :]
 
         output_encoder, attention_encoder = self.encoder(
             in_encoder, padding_mask=mask_padding, training=training)
@@ -102,7 +103,7 @@ class Transformer(tf.keras.Model):
         in_decoder = emb_decoder + pes_decoder
 
         mask_decoder_padding = tf.cast(tf.minimum(input_decoder, 1), tf.float32)
-        mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, :]
+        mask_decoder_padding = mask_decoder_padding[..., tf.newaxis, tf.newaxis, :]
         size = tok_decoder.shape[-1]
         look_ahead_mask = tf.linalg.band_part(tf.ones((size, size)), -1, 0)
         look_ahead_mask = tf.maximum(mask_decoder_padding, look_ahead_mask)
@@ -129,7 +130,7 @@ class Transformer(tf.keras.Model):
             TO COMPLETE
         """
         input = input_encoder, input_decoder
-        output = self(input=input)
+        output = self(input=input, training = False)
         output = tf.argmax(output, axis=-1)
 
         output = output.numpy()
@@ -161,8 +162,15 @@ class Transformer(tf.keras.Model):
 
     def fit(self, x: tf.Tensor, y: tf.Tensor, batch_size: int = 32, num_epochs: int = 1, validation_split = 0.0, wandb_api=True, file_to_save = None):
 
+        self.config = {
+                "batch_size":batch_size,
+                "epochs":num_epochs,
+                "dropout":self.dropout,
+                "d_model":self.model_size
+            }
+
         if wandb_api:
-            wandb.init(project="Chess-Transformer", entity="epideixx")
+            wandb.init(project="Chess-Transformer", entity="epideixx", config = self.config)
         
         if validation_split:
             train_size = int((1-validation_split) * len(x))
@@ -177,7 +185,7 @@ class Transformer(tf.keras.Model):
         train_dataset = tf.data.Dataset.zip((x_train, y_train))
 
 
-        train_dataset = train_dataset.shuffle(32000).batch(batch_size=batch_size)
+        train_dataset = train_dataset.shuffle(len(train_dataset)).batch(batch_size=batch_size)
         print(len(train_dataset))
 
         for epoch in range(num_epochs):
