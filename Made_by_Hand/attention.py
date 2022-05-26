@@ -82,16 +82,16 @@ class MultiHeadAttention(tf.keras.Model):
 
             # Here we scale the score as described in the paper
             attention /= tf.math.sqrt(tf.dtypes.cast(self.key_size, tf.float32))
-            # score has shape (batch, query_len, key_len)
+            # attention has shape (batch, query_len, key_len)
 
-            # mask must be broadcastable to (batch, query_len, value_len)
+            # mask must be broadcastable to (..., query_len, value_len)
             if mask is not None:
 
                 # cast mask to binary tensor (0.0 or 1.0)
                 mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
                 # set logits to -inf where mask=0 to ignore them
                 # during packpropagation
-                attention += (1.0 - mask) * -1e9
+                attention += (1.0 - mask) * -1e9 
 
             attention_head = tf.nn.softmax(attention, axis=-1)
             # alignment has shape (batch, query_len, key_len)
@@ -103,8 +103,8 @@ class MultiHeadAttention(tf.keras.Model):
 
         # Concatenate all the attention heads
         # so that the last dimension summed up to model_size
-        heads_output = tf.concat(heads_output, axis=2)
-
+        heads_output = tf.concat(heads_output, axis=-1) 
+        
         attention = tf.stack(heads_attention)
         output = self.wo(heads_output)
 
