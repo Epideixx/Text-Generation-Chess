@@ -1,12 +1,0 @@
-read fen.txt: 0 moves [00:00, ? moves/s]read fen.txt: 290228 moves [00:01, 290225.99 moves/s]read fen.txt: 606461 moves [00:02, 305519.78 moves/s]read fen.txt: 925992 moves [00:03, 311916.99 moves/s]read fen.txt: 1043569 moves [00:03, 310191.31 moves/s]
-wandb: Currently logged in as: epideixx (use `wandb login --relogin` to force relogin)
-wandb: wandb version 0.12.16 is available!  To upgrade, please run:
-wandb:  $ pip install wandb --upgrade
-wandb: Tracking run with wandb version 0.12.12
-wandb: Run data is saved locally in /gpfs/users/nguyenm/Text-Generation-Chess/wandb/run-20220520_101041-1jafws22
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run misunderstood-mountain-131
-wandb: ⭐️ View project at https://wandb.ai/epideixx/Chess-Transformer
-wandb: 🚀 View run at https://wandb.ai/epideixx/Chess-Transformer/runs/1jafws22
-510
-Epoch 0:   0% 0/510 [00:00<?, ? batch/s]/var/spool/slurm//job1751590/slurm_script: line 8: 231442 Bus error               python3 Ultimate_TTT/training.py -g
