@@ -3,7 +3,6 @@
 # ------------------------------------------------------
 
 
-from shutil import move
 import tensorflow as tf
 from embedding import TextEmbedder
 from tokenizer import ChessTokenizer

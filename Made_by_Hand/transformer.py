@@ -7,7 +7,6 @@ import numpy as np
 import wandb
 import os
 from tqdm import tqdm
-import time
 
 from tokenizer import ChessTokenizer
 from embedding import TextEmbedder
@@ -144,25 +143,16 @@ class Transformer(tf.keras.Model):
 
             input = encoder_inputs, decoder_inputs
 
-            t = time.time() # Prend du temps
             transfo_predict_outputs = self(input=input, training=True)
 
-            print("Time for one prediction : ", time.time() - t)
             
-            # Pas cette partie qui prend du temps
-            t = time.time()
             loss = self.loss(transfo_real_outputs,
                              transfo_predict_outputs)
-            print("Time for one loss calculation : ", time.time() - t)
 
-        t = time.time() # Prend du temps
         gradients = tape.gradient(loss, self.trainable_variables)
-        print("Time for one gradient : ", time.time() - t)
 
-        t = time.time() # Prend pas trop de temps
         self.optimizer.apply_gradients(
             zip(gradients, self.trainable_variables))
-        print("Time for one optimizer : ", time.time() - t)
        
 
         accuracy = self.accuracy(
