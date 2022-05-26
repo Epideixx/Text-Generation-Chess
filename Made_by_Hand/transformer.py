@@ -48,8 +48,7 @@ class Transformer(tf.keras.Model):
 
         self.encoder_embedding = TextEmbedder(
             vocab_size=vocab_board, depth_emb=model_size)
-        # print("Allez allez :")
-        # print(self.encoder_embedding.trainable_variables)
+
         self.encoder_PE = PositionalEncoding(
             seq_length=length_board, depth=model_size)
         self.encoder = Encoder(
