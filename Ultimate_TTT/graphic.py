@@ -1,6 +1,9 @@
 import pygame, sys
 from game import TTT
 from time import sleep
+import os
+
+from player_Transformer import Transfo_player
 
 pygame.init()
 
@@ -67,6 +70,14 @@ def play_game(player1 = "human", player2  ="human"):
     area_to_play = None
     change_player = False
     wait = False
+
+    name_folder_transfo = "Test_26_05_12h15"
+    folder_path = os.path.join(os.path.dirname(__file__), name_folder_transfo)
+
+    if "transformer" in players:
+        transfos = [Transfo_player(folder_path), Transfo_player(folder_path)]
+    
+    mem_moves = []
     
     while True :
         
@@ -135,13 +146,47 @@ def play_game(player1 = "human", player2  ="human"):
                         squares.append((clicked_row, clicked_col))
 
                     change_player = True
+                    mem_moves.append(ttt.rep_move(move))
 
                 except Exception:
                     print("You cannot play this move")
 
 
-            if players[player] == "random":
-                clicked_col, clicked_row = ttt.playRandomMove()
+            if players[player] in ["random", "transformer"]:
+
+                if players[player] == "random":
+                    clicked_col, clicked_row = ttt.playRandomMove()
+                    mem_moves.append(ttt.rep_move((clicked_col, clicked_row)))
+
+                elif players[player] == "transformer":
+                    count_try = 0
+
+                    board = ttt.rep_board()
+                    previous_moves = " ".join(mem_moves)
+
+                    while count_try <= 10:
+                        moves = transfos[player].choose_move(board=board, previous_moves=previous_moves)[0]
+                        print(moves)
+                        print(previous_moves)
+                        move = moves.split(" ")[-1].strip()
+                        letters = {let: i for i, let in enumerate("ABCDEFGHI")}
+                        move = (letters[move[0]], int(move[1]))
+                        
+                        try:
+                            ttt.push(move)
+                            mem_moves.append(ttt.rep_move(move))
+                            clicked_col, clicked_row = move
+                            break
+
+                        except Exception:
+                            print("Le coup n'est pas valable")
+                        count_try += 1
+                    
+                    if count_try > 10:
+                        clicked_col, clicked_row = ttt.playRandomMove()
+                        mem_moves.append(ttt.rep_move((clicked_col, clicked_row)))
+
+
                 if player == 0:
                     circles.append((clicked_row, clicked_col))
 
@@ -183,5 +228,5 @@ def play_game(player1 = "human", player2  ="human"):
 
 if __name__ == '__main__':
     print(COLOR, tuple([c//2 for c in COLOR]))
-    play_game(player2="random")
+    play_game(player2="transformer")
     

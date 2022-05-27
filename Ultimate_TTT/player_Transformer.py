@@ -47,8 +47,12 @@ class Transfo_player():
 
 
     def choose_move(self, board, previous_moves):
+        board = ["S" + board]
         board = self.encoder_tokenizer.texts_to_sequences(board, maxlen=length_board)
+
+        previous_moves = ["<Start> " + previous_moves]
         previous_moves = self.decoder_tokenizer.texts_to_sequences(previous_moves, maxlen=max_moves_in_game)
+        
         output_token = self.transfo.predict(board, previous_moves)
         output_moves = self.decoder_tokenizer.sequences_to_texts(output_token)
         return output_moves
@@ -57,13 +61,13 @@ class Transfo_player():
 
 if __name__ == '__main__':
     test = Transfo_player(os.path.join(os.path.dirname(__file__), "Test_26_05_12h15"))
-    moves = test.choose_move(['S|..x|x..|.o.|||...|..x|...|||oxo|...|...|||x..|o..|...|||..x|o..|ox.|||...|...|o.o|||.o.|...|...|||..x|..o|.xx|||x..|...|...||||||.........'], ['<Start> C1 H5 E7 E3 D0 C0 I0 G1 A3 C2 H8 E6 E2 F6 H2 F8 H7 D3 A2 A7'])
+    moves = test.choose_move('|..x|x..|.o.|||...|..x|...|||oxo|...|...|||x..|o..|...|||..x|o..|ox.|||...|...|o.o|||.o.|...|...|||..x|..o|.xx|||x..|...|...||||||.........', 'C1 H5 E7 E3 D0 C0 I0 G1 A3 C2 H8 E6 E2 F6 H2 F8 H7 D3 A2 A7')
     print(moves)
     print('ok')
 
-    moves = test.choose_move(['S|..x|x..|.o.|||...|..x|...|||oxo|...|...|||x..|o..|...|||..x|o..|ox.|||...|...|o.o|||.o.|...|...|||..x|..o|.xx|||x..|...|...||||||.........'], ['<Start> C1 H5 E7 E3 D0 C0 I0 G1 A3 C2 H8 E6 E2 F6 H2 F8 H7 D3'])
+    moves = test.choose_move('|..x|x..|.o.|||...|..x|...|||oxo|...|...|||x..|o..|...|||..x|o..|ox.|||...|...|o.o|||.o.|...|...|||..x|..o|.xx|||x..|...|...||||||.........', 'C1 H5 E7 E3 D0 C0 I0 G1 A3 C2 H8 E6 E2 F6 H2 F8 H7 D3')
     print(moves)
     print('ok')
 
-    moves = test.choose_move(["S|xox|x.x|oox|||o.o|.x.|xxo|||ooo|xx.|.o.|||..x|xoo|xo.|||.x.|o.x|oox|||xxo|oox|xo.|||o.o|x.o|xo.|||oo.|.xx|x.x|||xoo|xox|xxo||||||ox.x.ooxx"], ['<Start> I6 I1 I5 I8 G6 B2 D6 C1 G3 A1 C4 G5 B7 F4 I3 H0 F1 I4 H5 E6 D2 A6 A0 B0 F0 G2 B6 F2 H8 E7 D3 C0 I0 G0 A2 A7 B4 E3 E1 D5 A8 B8 F6 H1 F5 G7 A5 C7 H4 D4 A3 C2 I7 I2 H6 D7 C3 F3 E8 F7']) #E5
+    moves = test.choose_move("|xox|x.x|oox|||o.o|.x.|xxo|||ooo|xx.|.o.|||..x|xoo|xo.|||.x.|o.x|oox|||xxo|oox|xo.|||o.o|x.o|xo.|||oo.|.xx|x.x|||xoo|xox|xxo||||||ox.x.ooxx", 'I6 I1 I5 I8 G6 B2 D6 C1 G3 A1 C4 G5 B7 F4 I3 H0 F1 I4 H5 E6 D2 A6 A0 B0 F0 G2 B6 F2 H8 E7 D3 C0 I0 G0 A2 A7 B4 E3 E1 D5 A8 B8 F6 H1 F5 G7 A5 C7 H4 D4 A3 C2 I7 I2 H6 D7 C3 F3 E8 F7') #E5
     print(moves)
