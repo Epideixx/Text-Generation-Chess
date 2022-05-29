@@ -60,7 +60,7 @@ class Transfo_player():
         
 
 if __name__ == '__main__':
-    test = Transfo_player(os.path.join(os.path.dirname(__file__), "Test_26_05_12h15"))
+    test = Transfo_player(os.path.join(os.path.dirname(__file__), "Cluster_26_05"))
     moves, _, _, _ = test.choose_move('|..x|x..|.o.|||...|..x|...|||oxo|...|...|||x..|o..|...|||..x|o..|ox.|||...|...|o.o|||.o.|...|...|||..x|..o|.xx|||x..|...|...||||||.........', 'C1 H5 E7 E3 D0 C0 I0 G1 A3 C2 H8 E6 E2 F6 H2 F8 H7 D3 A2 A7')
     print(moves)
     print('ok')

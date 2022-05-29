@@ -71,7 +71,7 @@ def play_game(player1 = "human", player2  ="human"):
     change_player = False
     wait = False
 
-    name_folder_transfo = "Test_26_05_12h15"
+    name_folder_transfo = "Cluster_26_05"
     folder_path = os.path.join(os.path.dirname(__file__), name_folder_transfo)
 
     if "transformer" in players:
@@ -168,7 +168,7 @@ def play_game(player1 = "human", player2  ="human"):
                         moves = transfos[player].choose_move(board=board, previous_moves=previous_moves)[0]
                         print(moves)
                         print(previous_moves)
-                        move = moves.split(" ")[-1].strip()
+                        move = moves[0].split(" ")[-1].strip()
                         letters = {let: i for i, let in enumerate("ABCDEFGHI")}
                         move = (letters[move[0]], int(move[1]))
                         
