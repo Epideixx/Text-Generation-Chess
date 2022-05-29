@@ -173,8 +173,8 @@ class Decoder(tf.keras.Model):
             masked_attentions.append(masked_attention)
             attentions.append(attention)
 
-        masked_attention = tf.concat(masked_attentions, axis=-1)
-        attention = tf.concat(attentions, axis=-1)
+        masked_attention = tf.concat(masked_attentions, axis=0)
+        attention = tf.concat(attentions, axis=0)
 
         return output, masked_attention, attention
 

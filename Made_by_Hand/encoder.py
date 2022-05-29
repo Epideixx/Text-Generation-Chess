@@ -136,7 +136,7 @@ class Encoder(tf.keras.Model):
                 output, padding_mask, training)
             attentions.append(attention)
 
-        attention = tf.concat(attentions, axis=-1)
+        attention = tf.concat(attentions, axis=0)
 
         return output, attention
 

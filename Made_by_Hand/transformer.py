@@ -113,7 +113,7 @@ class Transformer(tf.keras.Model):
 
         output = self.final(output_decoder)
 
-        return output
+        return output, attention_encoder, masked_attention_decoder, attention_decoder
 
     def predict(self, input_encoder: tf.Tensor, input_decoder: tf.Tensor):
         """
@@ -130,12 +130,12 @@ class Transformer(tf.keras.Model):
             TO COMPLETE
         """
         input = input_encoder, input_decoder
-        output = self(input=input, training = False)
+        output, attention_encoder, masked_attention_decoder, attention_decoder = self(input=input, training = False)
         output = tf.argmax(output, axis=-1)
 
         output = output.numpy()
 
-        return output
+        return output, attention_encoder, masked_attention_decoder, attention_decoder
 
     def train_step(self, encoder_inputs, transfo_real_outputs, decoder_inputs):
 
@@ -143,7 +143,7 @@ class Transformer(tf.keras.Model):
 
             input = encoder_inputs, decoder_inputs
 
-            transfo_predict_outputs = self(input=input, training=True)
+            transfo_predict_outputs, _, _, _ = self(input=input, training=True)
 
             
             loss = self.loss(transfo_real_outputs,
@@ -213,7 +213,7 @@ class Transformer(tf.keras.Model):
                 valid_dataset = tf.data.Dataset.zip((x_valid, y_valid)).batch(batch_size=len(x_valid))
                 for batch, ((encoder_inputs, decoder_inputs), transfo_real_outputs) in enumerate(valid_dataset):
                     
-                    predict_outputs = self(input=(encoder_inputs, decoder_inputs), training=False)
+                    predict_outputs, _, _, _ = self(input=(encoder_inputs, decoder_inputs), training=False)
                     loss = self.loss(transfo_real_outputs, predict_outputs)
                     accuracy = self.accuracy(transfo_real_outputs, predict_outputs)
                     if wandb_api:

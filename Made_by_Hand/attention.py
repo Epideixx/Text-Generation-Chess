@@ -10,29 +10,29 @@ from import_data import import_data
 
 def scaled_dot_product(Q: tf.Tensor, K: tf.Tensor, V: tf.Tensor, mask: tf.Tensor = None):
         
-        attention = tf.matmul(Q,
-                                K, transpose_b=True)
+    attention = tf.matmul(Q,
+                            K, transpose_b=True)
 
-        # Here we scale the score as described in the paper
-        key_size = tf.cast(tf.shape(K)[-1], tf.float32)
-        attention /= tf.math.sqrt(tf.dtypes.cast(key_size, tf.float32))
-        # attention has shape (batch, query_len, key_len)
+    # Here we scale the score as described in the paper
+    key_size = tf.cast(tf.shape(K)[-1], tf.float32)
+    attention /= tf.math.sqrt(tf.dtypes.cast(key_size, tf.float32))
+    # attention has shape (batch, query_len, key_len)
 
-        # mask must be broadcastable to (..., query_len, value_len)
-        if mask is not None:
+    # mask must be broadcastable to (..., query_len, value_len)
+    if mask is not None:
 
-            # cast mask to binary tensor (0.0 or 1.0)
-            mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
-            # set logits to -inf where mask=0 to ignore them
-            # during packpropagation
-            attention += (1.0 - mask) * -1e9 
+        # cast mask to binary tensor (0.0 or 1.0)
+        mask = tf.cast(tf.cast(mask, tf.bool), tf.float32)
+        # set logits to -inf where mask=0 to ignore them
+        # during packpropagation
+        attention += (1.0 - mask) * -1e9 
 
-        attention = tf.nn.softmax(attention, axis=-1)
-        # alignment has shape (batch, query_len, key_len)
+    attention = tf.nn.softmax(attention, axis=-1)
+    # alignment has shape (batch, query_len, key_len)
 
-        output = attention @ V
+    output = attention @ V
 
-        return output, attention
+    return output, attention
 
 
 class MultiHeadAttention(tf.keras.Model):
